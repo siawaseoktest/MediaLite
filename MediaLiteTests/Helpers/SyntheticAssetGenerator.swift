@@ -528,64 +528,70 @@ public enum SyntheticAssetGenerator {
         }
         writer.startSession(atSourceTime: .zero)
 
-        // 1. Write Video Frames
+        // 1. Write Video Frames & Audio Buffers concurrently in an interleaved, balanced feed loop
         let totalFrames = max(1, Int(ceil(durationSeconds * Double(fps))))
-        for frameIndex in 0..<totalFrames {
-            let videoWaitStart = Date()
-            while !videoInput.isReadyForMoreMediaData {
-                if Date().timeIntervalSince(videoWaitStart) > 10.0 {
-                    throw SyntheticAssetError.writerFailed("Timed out waiting for video input readiness")
+        var videoFramesWritten = 0
+        var audioSamplesWritten = 0
+        let samplesPerBuffer: CMItemCount = 1024
+        let overallWaitStart = Date()
+
+        while videoFramesWritten < totalFrames || (hasAudio && audioSamplesWritten < totalAudioSamples) {
+            var wroteData = false
+
+            // Current timestamps in seconds
+            let currentVideoTime = Double(videoFramesWritten) / Double(fps)
+            let currentAudioTime = hasAudio ? Double(audioSamplesWritten) / sampleRate : currentVideoTime
+
+            // A. Video Feed: feed next frame if ready and video is not too far ahead of audio
+            if videoFramesWritten < totalFrames && (!hasAudio || currentVideoTime <= currentAudioTime + 0.35) {
+                if videoInput.isReadyForMoreMediaData {
+                    let pts = CMTime(value: CMTimeValue(videoFramesWritten), timescale: fps)
+                    if let pixelBuffer = makePixelBuffer(
+                        width: videoWidth,
+                        height: videoHeight,
+                        frameIndex: videoFramesWritten,
+                        totalFrames: totalFrames,
+                        isHDR: isHDR
+                    ) {
+                        adaptor.append(pixelBuffer, withPresentationTime: pts)
+                    }
+                    videoFramesWritten += 1
+                    wroteData = true
                 }
-                if writer.status == .failed || writer.status == .cancelled {
-                    throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "Writer failed during video feed")
-                }
-                try await Task.sleep(nanoseconds: 5_000_000)
             }
 
-            let pts = CMTime(value: CMTimeValue(frameIndex), timescale: fps)
-            if let pixelBuffer = makePixelBuffer(
-                width: videoWidth,
-                height: videoHeight,
-                frameIndex: frameIndex,
-                totalFrames: totalFrames,
-                isHDR: isHDR
-            ) {
-                adaptor.append(pixelBuffer, withPresentationTime: pts)
+            // B. Audio Feed: feed next buffer if ready and audio is not too far ahead of video
+            if let aInput = audioInput, audioSamplesWritten < totalAudioSamples {
+                if currentAudioTime <= currentVideoTime + 0.35 && aInput.isReadyForMoreMediaData {
+                    let framesToGenerate = min(samplesPerBuffer, CMItemCount(totalAudioSamples - audioSamplesWritten))
+                    let pts = CMTime(value: CMTimeValue(audioSamplesWritten), timescale: CMTimeScale(sampleRate))
+                    if let sampleBuffer = makeAudioSampleBuffer(
+                        sampleRate: sampleRate,
+                        channels: 2,
+                        frames: framesToGenerate,
+                        presentationTimeStamp: pts
+                    ) {
+                        aInput.append(sampleBuffer)
+                    }
+                    audioSamplesWritten += Int(framesToGenerate)
+                    wroteData = true
+                }
+            }
+
+            if writer.status == .failed || writer.status == .cancelled {
+                throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "Writer failed")
+            }
+
+            if !wroteData {
+                if Date().timeIntervalSince(overallWaitStart) > 20.0 {
+                    throw SyntheticAssetError.writerFailed("Timed out waiting for video/audio input readiness")
+                }
+                try await Task.sleep(nanoseconds: 2_000_000)
             }
         }
+
         videoInput.markAsFinished()
-
-        // 2. Write Audio Buffers (if enabled)
-        if let aInput = audioInput {
-            let samplesPerBuffer: CMItemCount = 1024
-            var audioSamplesWritten = 0
-
-            while audioSamplesWritten < totalAudioSamples {
-                let audioWaitStart = Date()
-                while !aInput.isReadyForMoreMediaData {
-                    if Date().timeIntervalSince(audioWaitStart) > 10.0 {
-                        throw SyntheticAssetError.writerFailed("Timed out waiting for audio input readiness")
-                    }
-                    if writer.status == .failed || writer.status == .cancelled {
-                        throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "Writer failed during audio feed")
-                    }
-                    try await Task.sleep(nanoseconds: 5_000_000)
-                }
-
-                let framesToGenerate = min(samplesPerBuffer, CMItemCount(totalAudioSamples - audioSamplesWritten))
-                let audioPts = CMTime(value: CMTimeValue(audioSamplesWritten), timescale: CMTimeScale(sampleRate))
-                if let sampleBuffer = makeAudioSampleBuffer(
-                    sampleRate: sampleRate,
-                    channels: 2,
-                    frames: framesToGenerate,
-                    presentationTimeStamp: audioPts
-                ) {
-                    aInput.append(sampleBuffer)
-                }
-                audioSamplesWritten += Int(framesToGenerate)
-            }
-            aInput.markAsFinished()
-        }
+        audioInput?.markAsFinished()
 
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             writer.finishWriting {
@@ -928,14 +934,31 @@ public enum SyntheticAssetGenerator {
             return nil
         }
 
-        // Color dynamic background
+        // Color dynamic background (with gradient for HDR to model natural scene entropy)
         let progress = totalFrames > 1 ? CGFloat(frameIndex) / CGFloat(totalFrames - 1) : 0.0
         let r = 0.2 + 0.6 * progress
         let g = 0.4 + 0.3 * (1.0 - progress)
         let b = 0.7
 
-        context.setFillColor(CGColor(srgbRed: r, green: g, blue: b, alpha: 1.0))
-        context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+        if isHDR, let gradient = CGGradient(
+            colorsSpace: colorSpace,
+            colors: [
+                CGColor(srgbRed: r, green: g, blue: b, alpha: 1.0),
+                CGColor(srgbRed: 0.9, green: 0.3, blue: 0.5, alpha: 1.0),
+                CGColor(srgbRed: 0.1, green: 0.7, blue: 0.8, alpha: 1.0)
+            ] as CFArray,
+            locations: [0.0, 0.5, 1.0]
+        ) {
+            context.drawLinearGradient(
+                gradient,
+                start: CGPoint(x: 0, y: 0),
+                end: CGPoint(x: width, y: height),
+                options: []
+            )
+        } else {
+            context.setFillColor(CGColor(srgbRed: r, green: g, blue: b, alpha: 1.0))
+            context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+        }
 
         // Moving ball to guarantee motion vectors for video encoders
         let radius = max(10.0, CGFloat(min(width, height)) * 0.1)
