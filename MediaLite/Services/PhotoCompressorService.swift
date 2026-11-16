@@ -202,52 +202,93 @@ public final class PhotoCompressorService: PhotoCompressorProtocol, @unchecked S
             }
         }
 
-        // 10. Create image destination
-        guard let destination = CGImageDestinationCreateWithURL(destinationURL as CFURL, targetCFType, 1, nil) else {
-            throw PhotoCompressionError.destinationCreationFailed(destinationURL)
+        // 10. Prepare base output metadata dictionary
+        // Keep essential metadata (EXIF/TIFF date, camera info) while avoiding redundant profile bloat
+        var baseProperties: [CFString: Any] = [:]
+        if let tiff = sourceProperties[kCGImagePropertyTIFFDictionary] as? [CFString: Any] {
+            var cleanTIFF = tiff
+            cleanTIFF[kCGImagePropertyTIFFOrientation] = CGImagePropertyOrientation.up.rawValue
+            cleanTIFF[kCGImagePropertyPixelWidth] = finalWidth
+            cleanTIFF[kCGImagePropertyPixelHeight] = finalHeight
+            baseProperties[kCGImagePropertyTIFFDictionary] = cleanTIFF
+        }
+        if let exif = sourceProperties[kCGImagePropertyExifDictionary] as? [CFString: Any] {
+            var cleanExif = exif
+            cleanExif[kCGImagePropertyExifPixelXDimension] = finalWidth
+            cleanExif[kCGImagePropertyExifPixelYDimension] = finalHeight
+            baseProperties[kCGImagePropertyExifDictionary] = cleanExif
         }
 
-        // 11. Build output metadata dictionary
-        var outputProperties: [CFString: Any] = sourceProperties
+        baseProperties[kCGImagePropertyPixelWidth] = finalWidth
+        baseProperties[kCGImagePropertyPixelHeight] = finalHeight
+        baseProperties[kCGImagePropertyOrientation] = CGImagePropertyOrientation.up.rawValue
 
-        // Update dimension tags to match the downscaled thumbnail
-        outputProperties[kCGImagePropertyPixelWidth] = finalWidth
-        outputProperties[kCGImagePropertyPixelHeight] = finalHeight
+        // 11. Encode image with adaptive compression quality to guarantee size reduction
+        var currentQuality = (targetUTType == .jpeg || targetUTType == .heic) ? strength.lossyQuality : nil
+        var finalCompressedSize: Int64 = 0
+        let maxQualityRetries = 3
 
-        // Since thumbnail transform was applied upright, normalize orientation to tag 1 (upright)
-        outputProperties[kCGImagePropertyOrientation] = CGImagePropertyOrientation.up.rawValue
+        for attempt in 0...maxQualityRetries {
+            if fileManager.fileExists(atPath: destinationURL.path) {
+                try? fileManager.removeItem(at: destinationURL)
+            }
 
-        // Synchronize TIFF metadata
-        if var tiffDict = outputProperties[kCGImagePropertyTIFFDictionary] as? [CFString: Any] {
-            tiffDict[kCGImagePropertyTIFFOrientation] = CGImagePropertyOrientation.up.rawValue
-            tiffDict[kCGImagePropertyPixelWidth] = finalWidth
-            tiffDict[kCGImagePropertyPixelHeight] = finalHeight
-            outputProperties[kCGImagePropertyTIFFDictionary] = tiffDict
-        }
+            guard let destination = CGImageDestinationCreateWithURL(destinationURL as CFURL, targetCFType, 1, nil) else {
+                throw PhotoCompressionError.destinationCreationFailed(destinationURL)
+            }
 
-        // Synchronize EXIF metadata
-        if var exifDict = outputProperties[kCGImagePropertyExifDictionary] as? [CFString: Any] {
-            exifDict[kCGImagePropertyExifPixelXDimension] = finalWidth
-            exifDict[kCGImagePropertyExifPixelYDimension] = finalHeight
-            outputProperties[kCGImagePropertyExifDictionary] = exifDict
-        }
+            var outputProperties = baseProperties
+            if let q = currentQuality {
+                outputProperties[kCGImageDestinationLossyCompressionQuality] = q
+            }
 
-        // Lossy compression factor for lossy formats (JPEG and HEIC)
-        if targetUTType == .jpeg || targetUTType == .heic {
-            outputProperties[kCGImageDestinationLossyCompressionQuality] = strength.lossyQuality
-        }
+            CGImageDestinationAddImage(destination, thumbnailImage, outputProperties as CFDictionary)
+            guard CGImageDestinationFinalize(destination) else {
+                throw PhotoCompressionError.compressionFailed("Failed to finalize image destination at \(destinationURL.path)")
+            }
 
-        // 12. Add image and finalize
-        CGImageDestinationAddImage(destination, thumbnailImage, outputProperties as CFDictionary)
-        guard CGImageDestinationFinalize(destination) else {
-            throw PhotoCompressionError.compressionFailed("Failed to finalize image destination at \(destinationURL.path)")
-        }
+            guard let compressedAttributes = try? fileManager.attributesOfItem(atPath: destinationURL.path),
+                  let writtenSize = (compressedAttributes[.size] as? NSNumber)?.int64Value,
+                  writtenSize > 0 else {
+                throw PhotoCompressionError.compressionFailed("Output file is missing or 0 bytes")
+            }
 
-        // 13. Verify output file size
-        guard let compressedAttributes = try? fileManager.attributesOfItem(atPath: destinationURL.path),
-              let compressedSize = (compressedAttributes[.size] as? NSNumber)?.int64Value,
-              compressedSize > 0 else {
-            throw PhotoCompressionError.compressionFailed("Output file is missing or 0 bytes")
+            finalCompressedSize = writtenSize
+
+            // Check if compressed file genuinely achieved size reduction
+            if writtenSize < originalSize {
+                break
+            }
+
+            // If file size increased or stayed same, adjust quality for lossy formats and retry
+            if let q = currentQuality, attempt < maxQualityRetries {
+                // Adaptive backoff: reduce quality moderately to absorb container overhead
+                currentQuality = max(0.35, q - 0.15)
+            } else if targetUTType == .png && attempt == 0 {
+                // For PNG, try stripping optional metadata dictionaries if size increased
+                baseProperties.removeValue(forKey: kCGImagePropertyTIFFDictionary)
+                baseProperties.removeValue(forKey: kCGImagePropertyExifDictionary)
+            } else {
+                // If still not smaller after retries, user benefit protection:
+                // If source and destination format match and orientation is already upright,
+                // keep original file so user never suffers a size penalty
+                let origOrientation = (sourceProperties[kCGImagePropertyOrientation] as? NSNumber)?.uint32Value ?? 1
+                let sourceExt = sourceURL.pathExtension.lowercased()
+                let matchesFormat = (targetUTType.preferredFilenameExtension?.lowercased() == sourceExt)
+                    || (targetUTType == .jpeg && (sourceExt == "jpg" || sourceExt == "jpeg"))
+                    || (targetUTType == .heic && sourceExt == "heic")
+                    || (targetUTType == .png && sourceExt == "png")
+
+                if matchesFormat && origOrientation == 1 {
+                    try? fileManager.removeItem(at: destinationURL)
+                    try? fileManager.copyItem(at: sourceURL, to: destinationURL)
+                    if let copiedAttrs = try? fileManager.attributesOfItem(atPath: destinationURL.path),
+                       let copiedSize = (copiedAttrs[.size] as? NSNumber)?.int64Value {
+                        finalCompressedSize = copiedSize
+                    }
+                }
+                break
+            }
         }
 
         compressionSucceeded = true
@@ -256,7 +297,7 @@ public final class PhotoCompressorService: PhotoCompressorProtocol, @unchecked S
             originalURL: sourceURL,
             compressedURL: destinationURL,
             originalSize: originalSize,
-            compressedSize: compressedSize,
+            compressedSize: finalCompressedSize,
             format: targetUTType
         )
     }

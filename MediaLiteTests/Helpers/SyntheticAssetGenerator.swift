@@ -220,15 +220,25 @@ public enum SyntheticAssetGenerator {
             // Clear entire background to complete transparency
             context.clear(CGRect(x: 0, y: 0, width: validWidth, height: validHeight))
 
-            // Left half: 50% opacity blue
-            context.setFillColor(CGColor(srgbRed: 0.1, green: 0.5, blue: 0.9, alpha: 0.5))
-            context.fill(CGRect(x: 0, y: 0, width: validWidth / 2, height: validHeight))
+            // Smooth diagonal multi-stop gradient with varying alpha transparency (photographic / modern UI style)
+            if let gradient = CGGradient(
+                colorsSpace: colorSpace,
+                colors: [
+                    CGColor(srgbRed: 0.1, green: 0.4, blue: 0.9, alpha: 0.5),
+                    CGColor(srgbRed: 0.8, green: 0.2, blue: 0.6, alpha: 0.75),
+                    CGColor(srgbRed: 0.95, green: 0.85, blue: 0.1, alpha: 0.95)
+                ] as CFArray,
+                locations: [0.0, 0.5, 1.0]
+            ) {
+                context.drawLinearGradient(
+                    gradient,
+                    start: CGPoint(x: 0, y: 0),
+                    end: CGPoint(x: validWidth, y: validHeight),
+                    options: []
+                )
+            }
 
-            // Right half: 75% opacity red
-            context.setFillColor(CGColor(srgbRed: 0.9, green: 0.2, blue: 0.3, alpha: 0.75))
-            context.fill(CGRect(x: validWidth / 2, y: 0, width: validWidth - (validWidth / 2), height: validHeight))
-
-            // Center: 90% opacity white circle
+            // Central circle element with alpha transparency
             let radius = CGFloat(min(validWidth, validHeight)) * 0.2
             context.setFillColor(CGColor(srgbRed: 1.0, green: 1.0, blue: 1.0, alpha: 0.9))
             context.fillEllipse(in: CGRect(
@@ -237,45 +247,33 @@ public enum SyntheticAssetGenerator {
                 width: radius * 2,
                 height: radius * 2
             ))
-
-            // Rich texture pattern to give UI/photographic entropy so downsampling yields measurable byte savings
-            if validWidth > 8 && validHeight > 8 {
-                let step = max(6, min(validWidth, validHeight) / 10)
-                for x in stride(from: 0, to: validWidth, by: step) {
-                    for y in stride(from: 0, to: validHeight, by: step) {
-                        if (x / step + y / step) % 2 == 0 {
-                            context.setFillColor(CGColor(srgbRed: 0.95, green: 0.85, blue: 0.1, alpha: 0.6))
-                            context.fill(CGRect(x: x, y: y, width: step, height: step))
-                        }
-                    }
-                }
-            }
         } else {
-            // Opaque emerald background with amber central block
-            context.setFillColor(CGColor(srgbRed: 0.15, green: 0.75, blue: 0.35, alpha: 1.0))
-            context.fill(CGRect(x: 0, y: 0, width: validWidth, height: validHeight))
+            // Opaque smooth diagonal gradient (emerald to amber to crimson)
+            if let gradient = CGGradient(
+                colorsSpace: colorSpace,
+                colors: [
+                    CGColor(srgbRed: 0.15, green: 0.75, blue: 0.35, alpha: 1.0),
+                    CGColor(srgbRed: 0.95, green: 0.75, blue: 0.15, alpha: 1.0),
+                    CGColor(srgbRed: 0.85, green: 0.25, blue: 0.35, alpha: 1.0)
+                ] as CFArray,
+                locations: [0.0, 0.5, 1.0]
+            ) {
+                context.drawLinearGradient(
+                    gradient,
+                    start: CGPoint(x: 0, y: 0),
+                    end: CGPoint(x: validWidth, y: validHeight),
+                    options: []
+                )
+            }
 
-            context.setFillColor(CGColor(srgbRed: 1.0, green: 0.8, blue: 0.2, alpha: 1.0))
+            // Contrasting central block
+            context.setFillColor(CGColor(srgbRed: 0.2, green: 0.4, blue: 0.8, alpha: 1.0))
             context.fill(CGRect(
                 x: validWidth / 4,
                 y: validHeight / 4,
                 width: validWidth / 2,
                 height: validHeight / 2
             ))
-
-            // Rich multi-color pattern so downscaled PNGs genuinely reduce byte size
-            if validWidth > 8 && validHeight > 8 {
-                let step = max(4, min(validWidth, validHeight) / 12)
-                for x in stride(from: 0, to: validWidth, by: step) {
-                    for y in stride(from: 0, to: validHeight, by: step) {
-                        let r = CGFloat((x * 7) % 255) / 255.0
-                        let g = CGFloat((y * 11) % 255) / 255.0
-                        let b = CGFloat(((x + y) * 13) % 255) / 255.0
-                        context.setFillColor(CGColor(srgbRed: r, green: g, blue: b, alpha: 1.0))
-                        context.fill(CGRect(x: x, y: y, width: step, height: step))
-                    }
-                }
-            }
         }
 
         guard let image = context.makeImage() else {
@@ -341,9 +339,26 @@ public enum SyntheticAssetGenerator {
             throw SyntheticAssetError.contextCreationFailed
         }
 
-        // Violet background
-        context.setFillColor(CGColor(srgbRed: 0.4, green: 0.2, blue: 0.7, alpha: 1.0))
-        context.fill(CGRect(x: 0, y: 0, width: validWidth, height: validHeight))
+        // Smooth photographic gradient background
+        if let gradient = CGGradient(
+            colorsSpace: colorSpace,
+            colors: [
+                CGColor(srgbRed: 0.35, green: 0.15, blue: 0.65, alpha: 1.0),
+                CGColor(srgbRed: 0.15, green: 0.45, blue: 0.75, alpha: 1.0),
+                CGColor(srgbRed: 0.85, green: 0.35, blue: 0.25, alpha: 1.0)
+            ] as CFArray,
+            locations: [0.0, 0.5, 1.0]
+        ) {
+            context.drawLinearGradient(
+                gradient,
+                start: CGPoint(x: 0, y: 0),
+                end: CGPoint(x: validWidth, y: validHeight),
+                options: []
+            )
+        } else {
+            context.setFillColor(CGColor(srgbRed: 0.4, green: 0.2, blue: 0.7, alpha: 1.0))
+            context.fill(CGRect(x: 0, y: 0, width: validWidth, height: validHeight))
+        }
 
         // Asymmetric gold indicator in the top-left quadrant to visually verify orientation changes
         context.setFillColor(CGColor(srgbRed: 1.0, green: 0.9, blue: 0.1, alpha: 1.0))
@@ -353,21 +368,6 @@ public enum SyntheticAssetGenerator {
             width: max(1, validWidth / 3),
             height: max(1, validHeight / 3)
         ))
-
-        // Natural frequency detail so compression yields genuine byte savings
-        if validWidth > 8 && validHeight > 8 {
-            let step = max(6, min(validWidth, validHeight) / 10)
-            for x in stride(from: 0, to: validWidth, by: step) {
-                for y in stride(from: 0, to: validHeight, by: step) {
-                    if (x / step + y / step) % 2 == 1 {
-                        let r = CGFloat((x * 9) % 255) / 255.0
-                        let g = CGFloat((y * 5) % 255) / 255.0
-                        context.setFillColor(CGColor(srgbRed: r, green: g, blue: 0.6, alpha: 0.8))
-                        context.fill(CGRect(x: x, y: y, width: step, height: step))
-                    }
-                }
-            }
-        }
 
         guard let image = context.makeImage() else {
             throw SyntheticAssetError.imageCreationFailed
@@ -528,7 +528,7 @@ public enum SyntheticAssetGenerator {
         }
         writer.startSession(atSourceTime: .zero)
 
-        // 1. Write Video Frames & Interleaved Audio Buffers
+        // 1. Write Video Frames
         let totalFrames = max(1, Int(ceil(durationSeconds * Double(fps))))
         for frameIndex in 0..<totalFrames {
             let videoWaitStart = Date()
@@ -539,7 +539,7 @@ public enum SyntheticAssetGenerator {
                 if writer.status == .failed || writer.status == .cancelled {
                     throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "Writer failed during video feed")
                 }
-                try await Task.sleep(nanoseconds: 2_000_000)
+                try await Task.sleep(nanoseconds: 5_000_000)
             }
 
             let pts = CMTime(value: CMTimeValue(frameIndex), timescale: fps)
@@ -552,40 +552,14 @@ public enum SyntheticAssetGenerator {
             ) {
                 adaptor.append(pixelBuffer, withPresentationTime: pts)
             }
-
-            // Interleave audio writing up to current video frame timestamp to prevent muxer backpressure deadlocks
-            if let aInput = audioInput {
-                let targetAudioSamples = min(totalAudioSamples, Int(Double(frameIndex + 1) / Double(fps) * sampleRate))
-                while audioSamplesWritten < targetAudioSamples {
-                    let audioWaitStart = Date()
-                    while !aInput.isReadyForMoreMediaData {
-                        if Date().timeIntervalSince(audioWaitStart) > 10.0 {
-                            throw SyntheticAssetError.writerFailed("Timed out waiting for audio input readiness")
-                        }
-                        if writer.status == .failed || writer.status == .cancelled {
-                            throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "Writer failed during audio feed")
-                        }
-                        try await Task.sleep(nanoseconds: 2_000_000)
-                    }
-
-                    let framesToGenerate = min(samplesPerBuffer, CMItemCount(targetAudioSamples - audioSamplesWritten))
-                    let audioPts = CMTime(value: CMTimeValue(audioSamplesWritten), timescale: CMTimeScale(sampleRate))
-                    if let sampleBuffer = makeAudioSampleBuffer(
-                        sampleRate: sampleRate,
-                        channels: 2,
-                        frames: framesToGenerate,
-                        presentationTimeStamp: audioPts
-                    ) {
-                        aInput.append(sampleBuffer)
-                    }
-                    audioSamplesWritten += Int(framesToGenerate)
-                }
-            }
         }
         videoInput.markAsFinished()
 
-        // 2. Finish any remaining audio samples
+        // 2. Write Audio Buffers (if enabled)
         if let aInput = audioInput {
+            let samplesPerBuffer: CMItemCount = 1024
+            var audioSamplesWritten = 0
+
             while audioSamplesWritten < totalAudioSamples {
                 let audioWaitStart = Date()
                 while !aInput.isReadyForMoreMediaData {
@@ -595,7 +569,7 @@ public enum SyntheticAssetGenerator {
                     if writer.status == .failed || writer.status == .cancelled {
                         throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "Writer failed during audio feed")
                     }
-                    try await Task.sleep(nanoseconds: 2_000_000)
+                    try await Task.sleep(nanoseconds: 5_000_000)
                 }
 
                 let framesToGenerate = min(samplesPerBuffer, CMItemCount(totalAudioSamples - audioSamplesWritten))
@@ -610,7 +584,7 @@ public enum SyntheticAssetGenerator {
                 }
                 audioSamplesWritten += Int(framesToGenerate)
             }
-            audioInput?.markAsFinished()
+            aInput.markAsFinished()
         }
 
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
