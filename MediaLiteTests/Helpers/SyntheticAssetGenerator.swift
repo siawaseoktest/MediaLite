@@ -556,7 +556,9 @@ public enum SyntheticAssetGenerator {
                         wroteData = true
                     }
                 } else {
+                    videoInput.markAsFinished()
                     videoFinished = true
+                    wroteData = true
                 }
             }
 
@@ -578,7 +580,9 @@ public enum SyntheticAssetGenerator {
                         wroteData = true
                     }
                 } else {
+                    aInput.markAsFinished()
                     audioFinished = true
+                    wroteData = true
                 }
             }
 
@@ -596,8 +600,12 @@ public enum SyntheticAssetGenerator {
             }
         }
 
-        videoInput.markAsFinished()
-        audioInput?.markAsFinished()
+        if !videoFinished {
+            videoInput.markAsFinished()
+        }
+        if !audioFinished {
+            audioInput?.markAsFinished()
+        }
 
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             writer.finishWriting {
