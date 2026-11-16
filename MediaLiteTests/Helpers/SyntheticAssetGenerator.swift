@@ -955,6 +955,17 @@ public enum SyntheticAssetGenerator {
                 end: CGPoint(x: width, y: height),
                 options: []
             )
+
+            // Realistic HDR natural geometric horizon and sun rays to generate authentic 10-bit video entropy
+            context.setStrokeColor(CGColor(srgbRed: 1.0, green: 0.95, blue: 0.8, alpha: 0.7))
+            context.setLineWidth(max(2.0, CGFloat(min(width, height)) * 0.015))
+            for i in 0..<8 {
+                let offset = CGFloat(i) * CGFloat(width) / 8.0
+                context.strokeLineSegments(between: [
+                    CGPoint(x: offset, y: 0),
+                    CGPoint(x: CGFloat(width) - offset, y: CGFloat(height))
+                ])
+            }
         } else {
             context.setFillColor(CGColor(srgbRed: r, green: g, blue: b, alpha: 1.0))
             context.fill(CGRect(x: 0, y: 0, width: width, height: height))

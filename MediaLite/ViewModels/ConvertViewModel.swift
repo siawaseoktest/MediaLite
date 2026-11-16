@@ -200,6 +200,7 @@ public final class ConvertViewModel: ObservableObject {
                 self.conversionProgress = 1.0
                 self.progressDescription = "Complete"
                 self.avPlayer = AVPlayer(url: result.processedURL)
+                self.isConverting = false
                 self.isCompleted = true
                 
                 // History log
