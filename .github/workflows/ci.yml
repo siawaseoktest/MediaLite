@@ -1,0 +1,182 @@
+name: CI
+
+"on":
+  push:
+    branches:
+      - main
+      - master
+      - develop
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build, Test & Package
+    runs-on: macos-14
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Select Xcode Version
+        run: |
+          echo "Selecting Xcode version..."
+          if [ -d "/Applications/Xcode_15.4.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+          elif [ -d "/Applications/Xcode_16.2.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+          elif [ -d "/Applications/Xcode_16.1.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
+          elif [ -d "/Applications/Xcode.app" ]; then
+            sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          fi
+          echo "Active Xcode: $(xcodebuild -version | head -n 1)"
+
+      - name: Setup Apple Certificate and Keychain (Optional)
+        env:
+          CERT_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+          PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          if [ -n "$CERT_BASE64" ] && [ -n "$PROFILE_BASE64" ] && [ -n "$KEYCHAIN_PASSWORD" ]; then
+            echo "Signing secrets detected. Configuring ephemeral keychain..."
+            KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain-db"
+            security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+            security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+            security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+            CERT_PATH="$RUNNER_TEMP/certificate.p12"
+            echo -n "$CERT_BASE64" | base64 --decode -o "$CERT_PATH"
+            security import "$CERT_PATH" -P "$KEYCHAIN_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+            security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+            mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+            echo -n "$PROFILE_BASE64" | base64 --decode -o ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+            echo "Ephemeral keychain and provisioning profile configured successfully."
+          else
+            echo "No signing secrets provided; proceeding with unsigned builds for CI."
+          fi
+
+      - name: Privacy Gate - Zero Network Verification
+        run: |
+          echo "Scanning production source code for forbidden networking frameworks and symbols..."
+          FORBIDDEN_PATTERN='import[[:space:]]+(Network|WebKit|CFNetwork|SystemConfiguration|Alamofire|Socket)|URLSession|NWPathMonitor|WKWebView|NSURLConnection'
+          if grep -rn --include="*.swift" -E "$FORBIDDEN_PATTERN" MediaLite/; then
+            echo "::error file=MediaLite::Zero-network invariant violated! Forbidden networking modules or symbols detected in production code."
+            exit 1
+          else
+            echo "Privacy check passed: Zero forbidden networking imports or symbols detected in MediaLite/."
+          fi
+
+      - name: Swift Syntax & Lint
+        run: |
+          if command -v swiftlint &> /dev/null; then
+            echo "Running SwiftLint..."
+            swiftlint lint --reporter github-actions-logging
+          else
+            echo "SwiftLint not pre-installed, skipping lint step."
+          fi
+
+      - name: Run Tests on iOS Simulator
+        run: |
+          # Resolve simulator destination dynamically with iPhone 15 preference
+          DESTINATION="platform=iOS Simulator,name=iPhone 15,OS=latest"
+          if ! xcrun simctl list devices available | grep -q "iPhone 15"; then
+            FALLBACK_DEVICE=$(xcrun simctl list devices available | grep -E "iPhone" | head -n 1 | sed -E "s/.*(iPhone [^(]+).*/\1/" | xargs)
+            if [ -n "$FALLBACK_DEVICE" ]; then
+              echo "iPhone 15 not found, falling back to: $FALLBACK_DEVICE"
+              DESTINATION="platform=iOS Simulator,name=$FALLBACK_DEVICE,OS=latest"
+            else
+              DESTINATION="platform=iOS Simulator,name=Any iOS Simulator Device"
+            fi
+          fi
+          echo "Target simulator destination: $DESTINATION"
+
+          mkdir -p build/artifacts
+          rm -rf build/artifacts/MediaLiteTests.xcresult
+
+          if command -v xcbeautify &> /dev/null; then
+            set -o pipefail && xcodebuild test \
+              -project MediaLite.xcodeproj \
+              -scheme MediaLite \
+              -destination "$DESTINATION" \
+              -resultBundlePath build/artifacts/MediaLiteTests.xcresult \
+              -enableCodeCoverage YES \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGNING_REQUIRED=NO \
+              CODE_SIGN_IDENTITY="" | xcbeautify
+          else
+            xcodebuild test \
+              -project MediaLite.xcodeproj \
+              -scheme MediaLite \
+              -destination "$DESTINATION" \
+              -resultBundlePath build/artifacts/MediaLiteTests.xcresult \
+              -enableCodeCoverage YES \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGNING_REQUIRED=NO \
+              CODE_SIGN_IDENTITY=""
+          fi
+
+      - name: Upload Test Results (.xcresult)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MediaLiteTests-xcresult
+          path: build/artifacts/MediaLiteTests.xcresult
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Build Release Archive
+        if: success()
+        run: |
+          mkdir -p build/artifacts
+          rm -rf build/artifacts/MediaLite.xcarchive build/artifacts/MediaLite.xcarchive.zip
+
+          echo "Archiving release build (unsigned)..."
+          xcodebuild archive \
+            -project MediaLite.xcodeproj \
+            -scheme MediaLite \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/artifacts/MediaLite.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+          echo "Packaging xcarchive into zip archive..."
+          cd build/artifacts
+          zip -r -y MediaLite.xcarchive.zip MediaLite.xcarchive
+          cd -
+
+      - name: Upload Release Archive
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MediaLite-Release-Archive
+          path: |
+            build/artifacts/MediaLite.xcarchive.zip
+            build/artifacts/MediaLite.xcarchive
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Clean up Keychain
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/build.keychain-db" ]; then
+            echo "Cleaning up ephemeral keychain..."
+            security delete-keychain "$RUNNER_TEMP/build.keychain-db" || true
+          fi

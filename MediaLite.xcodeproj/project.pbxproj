@@ -1,0 +1,790 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000012900000100000001 /* MediaLiteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900000100000001 /* MediaLiteApp.swift */; };
+		A10000012900000200000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900000200000001 /* ContentView.swift */; };
+		A10000012900000300000001 /* CompressionQuality.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900000300000001 /* CompressionQuality.swift */; };
+		A10000012900000400000001 /* ConversionMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900000400000001 /* ConversionMode.swift */; };
+		A10000012900000500000001 /* MediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900000500000001 /* MediaItem.swift */; };
+		A10000012900000600000001 /* ProcessingResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900000600000001 /* ProcessingResult.swift */; };
+		A10000012900000700000001 /* HistoryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900000700000001 /* HistoryRecord.swift */; };
+		A10000012900000800000001 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900000800000001 /* AppSettings.swift */; };
+		A10000012900000900000001 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900000900000001 /* Formatters.swift */; };
+		A10000012900000A00000001 /* TempFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900000A00000001 /* TempFileManager.swift */; };
+		A10000012900000B00000001 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900000B00000001 /* DesignSystem.swift */; };
+		A10000012900000C00000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A10000022900000C00000001 /* Assets.xcassets */; };
+		A10000012900000D00000001 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A10000022900000D00000001 /* PrivacyInfo.xcprivacy */; };
+		A10000012900000E00000001 /* CompressionRatioCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900000E00000001 /* CompressionRatioCalculatorTests.swift */; };
+		A10000012900000F00000001 /* AppSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900000F00000001 /* AppSettingsTests.swift */; };
+		A10000012900001000000001 /* TempFileManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900001000000001 /* TempFileManagerTests.swift */; };
+		A10000012900001200000001 /* SyntheticAssetGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900001200000001 /* SyntheticAssetGenerator.swift */; };
+		A10000012900001300000001 /* SyntheticAssetGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900001300000001 /* SyntheticAssetGeneratorTests.swift */; };
+		A10000012900001400000001 /* PhotoCompressionE2ETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900001400000001 /* PhotoCompressionE2ETests.swift */; };
+		A10000012900001500000001 /* VideoProcessingE2ETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900001500000001 /* VideoProcessingE2ETests.swift */; };
+		A10000012900001600000001 /* HistoryAndSettingsE2ETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900001600000001 /* HistoryAndSettingsE2ETests.swift */; };
+		A10000012900001700000001 /* FormattingAndModelsE2ETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900001700000001 /* FormattingAndModelsE2ETests.swift */; };
+		A10000012900001800000001 /* PrivacyAndSecurityE2ETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900001800000001 /* PrivacyAndSecurityE2ETests.swift */; };
+		A10000012900001900000001 /* MediaBoundaryE2ETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900001900000001 /* MediaBoundaryE2ETests.swift */; };
+		A10000012900001A00000001 /* CorruptionAndErrorE2ETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900001A00000001 /* CorruptionAndErrorE2ETests.swift */; };
+		A10000012900001B00000001 /* ConcurrencyAndCancellationE2ETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900001B00000001 /* ConcurrencyAndCancellationE2ETests.swift */; };
+		A10000012900001C00000001 /* MediaCombinationsE2ETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900001C00000001 /* MediaCombinationsE2ETests.swift */; };
+		A10000012900001D00000001 /* WorkflowPairwiseE2ETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900001D00000001 /* WorkflowPairwiseE2ETests.swift */; };
+		A10000012900001E00000001 /* VacationBatchWorkflowE2ETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900001E00000001 /* VacationBatchWorkflowE2ETests.swift */; };
+		A10000012900001F00000001 /* SocialMediaSharingWorkflowE2ETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900001F00000001 /* SocialMediaSharingWorkflowE2ETests.swift */; };
+		A10000012900002000000001 /* DeviceStorageCleanupWorkflowE2ETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900002000000001 /* DeviceStorageCleanupWorkflowE2ETests.swift */; };
+		A10000012900002100000001 /* PhotoCompressorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900002100000001 /* PhotoCompressorService.swift */; };
+		A10000012900002400000001 /* VideoProcessorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900002400000001 /* VideoProcessorService.swift */; };
+		A10000012900002500000001 /* HistoryStorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900002500000001 /* HistoryStorageService.swift */; };
+		A10000012900002600000001 /* PhotoLibraryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900002600000001 /* PhotoLibraryService.swift */; };
+		A10000012900002200000001 /* ExifHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900002200000001 /* ExifHelper.swift */; };
+		A10000012900002300000001 /* PhotoCompressorServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900002300000001 /* PhotoCompressorServiceTests.swift */; };
+		A10000012900002700000001 /* VideoProcessorServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900002700000001 /* VideoProcessorServiceTests.swift */; };
+		A10000012900002800000001 /* HistoryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900002800000001 /* HistoryStoreTests.swift */; };
+		A10000012900002900000001 /* PhotoLibraryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900002900000001 /* PhotoLibraryServiceTests.swift */; };
+		A10000012900002A00000001 /* PrivacyEnforcementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900002A00000001 /* PrivacyEnforcementTests.swift */; };
+		A10000012900002B00000001 /* LiquidGlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900002B00000001 /* LiquidGlassCard.swift */; };
+		A10000012900002C00000001 /* SavingsBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900002C00000001 /* SavingsBadge.swift */; };
+		A10000012900002D00000001 /* StatMetricView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900002D00000001 /* StatMetricView.swift */; };
+		A10000012900002E00000001 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900002E00000001 /* HomeViewModel.swift */; };
+		A10000012900002F00000001 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900002F00000001 /* HomeView.swift */; };
+		A10000012900003000000001 /* CompressViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003000000001 /* CompressViewModel.swift */; };
+		A10000012900003100000001 /* CompressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003100000001 /* CompressView.swift */; };
+		A10000012900003200000001 /* ConvertViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003200000001 /* ConvertViewModel.swift */; };
+		A10000012900003300000001 /* ConvertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003300000001 /* ConvertView.swift */; };
+		A10000012900003400000001 /* HistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003400000001 /* HistoryViewModel.swift */; };
+		A10000012900003500000001 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003500000001 /* HistoryView.swift */; };
+		A10000012900003600000001 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003600000001 /* SettingsViewModel.swift */; };
+		A10000012900003700000001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003700000001 /* SettingsView.swift */; };
+		A10000012900003800000001 /* HomeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003800000001 /* HomeViewModelTests.swift */; };
+		A10000012900003900000001 /* CompressViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003900000001 /* CompressViewModelTests.swift */; };
+		A10000012900003A00000001 /* ConvertViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003A00000001 /* ConvertViewModelTests.swift */; };
+		A10000012900003B00000001 /* HistoryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003B00000001 /* HistoryViewModelTests.swift */; };
+		A10000012900003C00000001 /* SettingsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003C00000001 /* SettingsViewModelTests.swift */; };
+		A10000012900003D00000001 /* TabNavigationAndAccessibilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003D00000001 /* TabNavigationAndAccessibilityTests.swift */; };
+		A10000012900003E00000001 /* Tier5_AdversarialHardeningTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003E00000001 /* Tier5_AdversarialHardeningTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A10000032900000100000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A10000002900000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A10000042900000100000001;
+			remoteInfo = MediaLite;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A10000022900000100000001 /* MediaLiteApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaLiteApp.swift; sourceTree = "<group>"; };
+		A10000022900000200000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A10000022900000300000001 /* CompressionQuality.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompressionQuality.swift; sourceTree = "<group>"; };
+		A10000022900000400000001 /* ConversionMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversionMode.swift; sourceTree = "<group>"; };
+		A10000022900000500000001 /* MediaItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaItem.swift; sourceTree = "<group>"; };
+		A10000022900000600000001 /* ProcessingResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingResult.swift; sourceTree = "<group>"; };
+		A10000022900000700000001 /* HistoryRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryRecord.swift; sourceTree = "<group>"; };
+		A10000022900000800000001 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		A10000022900000900000001 /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
+		A10000022900000A00000001 /* TempFileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempFileManager.swift; sourceTree = "<group>"; };
+		A10000022900000B00000001 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
+		A10000022900000C00000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A10000022900000D00000001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		A10000022900001100000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A10000022900000E00000001 /* CompressionRatioCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompressionRatioCalculatorTests.swift; sourceTree = "<group>"; };
+		A10000022900000F00000001 /* AppSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsTests.swift; sourceTree = "<group>"; };
+		A10000022900001000000001 /* TempFileManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempFileManagerTests.swift; sourceTree = "<group>"; };
+		A10000022900001200000001 /* SyntheticAssetGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntheticAssetGenerator.swift; sourceTree = "<group>"; };
+		A10000022900001300000001 /* SyntheticAssetGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntheticAssetGeneratorTests.swift; sourceTree = "<group>"; };
+		A10000052900000100000001 /* MediaLite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MediaLite.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000052900000200000001 /* MediaLiteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MediaLiteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000022900001400000001 /* PhotoCompressionE2ETests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCompressionE2ETests.swift; sourceTree = "<group>"; };
+		A10000022900001500000001 /* VideoProcessingE2ETests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoProcessingE2ETests.swift; sourceTree = "<group>"; };
+		A10000022900001600000001 /* HistoryAndSettingsE2ETests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryAndSettingsE2ETests.swift; sourceTree = "<group>"; };
+		A10000022900001700000001 /* FormattingAndModelsE2ETests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormattingAndModelsE2ETests.swift; sourceTree = "<group>"; };
+		A10000022900001800000001 /* PrivacyAndSecurityE2ETests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyAndSecurityE2ETests.swift; sourceTree = "<group>"; };
+		A10000022900001900000001 /* MediaBoundaryE2ETests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaBoundaryE2ETests.swift; sourceTree = "<group>"; };
+		A10000022900001A00000001 /* CorruptionAndErrorE2ETests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CorruptionAndErrorE2ETests.swift; sourceTree = "<group>"; };
+		A10000022900001B00000001 /* ConcurrencyAndCancellationE2ETests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConcurrencyAndCancellationE2ETests.swift; sourceTree = "<group>"; };
+		A10000022900001C00000001 /* MediaCombinationsE2ETests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaCombinationsE2ETests.swift; sourceTree = "<group>"; };
+		A10000022900001D00000001 /* WorkflowPairwiseE2ETests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkflowPairwiseE2ETests.swift; sourceTree = "<group>"; };
+		A10000022900001E00000001 /* VacationBatchWorkflowE2ETests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VacationBatchWorkflowE2ETests.swift; sourceTree = "<group>"; };
+		A10000022900001F00000001 /* SocialMediaSharingWorkflowE2ETests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialMediaSharingWorkflowE2ETests.swift; sourceTree = "<group>"; };
+		A10000022900002000000001 /* DeviceStorageCleanupWorkflowE2ETests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStorageCleanupWorkflowE2ETests.swift; sourceTree = "<group>"; };
+		A10000022900002100000001 /* PhotoCompressorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCompressorService.swift; sourceTree = "<group>"; };
+		A10000022900002400000001 /* VideoProcessorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoProcessorService.swift; sourceTree = "<group>"; };
+		A10000022900002500000001 /* HistoryStorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryStorageService.swift; sourceTree = "<group>"; };
+		A10000022900002600000001 /* PhotoLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryService.swift; sourceTree = "<group>"; };
+		A10000022900002200000001 /* ExifHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExifHelper.swift; sourceTree = "<group>"; };
+		A10000022900002300000001 /* PhotoCompressorServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCompressorServiceTests.swift; sourceTree = "<group>"; };
+		A10000022900002700000001 /* VideoProcessorServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoProcessorServiceTests.swift; sourceTree = "<group>"; };
+		A10000022900002800000001 /* HistoryStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryStoreTests.swift; sourceTree = "<group>"; };
+		A10000022900002900000001 /* PhotoLibraryServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryServiceTests.swift; sourceTree = "<group>"; };
+		A10000022900002A00000001 /* PrivacyEnforcementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyEnforcementTests.swift; sourceTree = "<group>"; };
+		A10000022900002B00000001 /* LiquidGlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassCard.swift; sourceTree = "<group>"; };
+		A10000022900002C00000001 /* SavingsBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsBadge.swift; sourceTree = "<group>"; };
+		A10000022900002D00000001 /* StatMetricView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatMetricView.swift; sourceTree = "<group>"; };
+		A10000022900002E00000001 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
+		A10000022900002F00000001 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		A10000022900003000000001 /* CompressViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompressViewModel.swift; sourceTree = "<group>"; };
+		A10000022900003100000001 /* CompressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompressView.swift; sourceTree = "<group>"; };
+		A10000022900003200000001 /* ConvertViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConvertViewModel.swift; sourceTree = "<group>"; };
+		A10000022900003300000001 /* ConvertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConvertView.swift; sourceTree = "<group>"; };
+		A10000022900003400000001 /* HistoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViewModel.swift; sourceTree = "<group>"; };
+		A10000022900003500000001 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		A10000022900003600000001 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		A10000022900003700000001 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A10000022900003800000001 /* HomeViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModelTests.swift; sourceTree = "<group>"; };
+		A10000022900003900000001 /* CompressViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompressViewModelTests.swift; sourceTree = "<group>"; };
+		A10000022900003A00000001 /* ConvertViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConvertViewModelTests.swift; sourceTree = "<group>"; };
+		A10000022900003B00000001 /* HistoryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViewModelTests.swift; sourceTree = "<group>"; };
+		A10000022900003C00000001 /* SettingsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModelTests.swift; sourceTree = "<group>"; };
+		A10000022900003D00000001 /* TabNavigationAndAccessibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabNavigationAndAccessibilityTests.swift; sourceTree = "<group>"; };
+		A10000022900003E00000001 /* Tier5_AdversarialHardeningTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tier5_AdversarialHardeningTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A10000062900000100000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000062900000200000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A10000072900000000000001 = {
+			isa = PBXGroup;
+			children = (
+				A10000072900000100000001 /* MediaLite */,
+				A10000072900000200000001 /* MediaLiteTests */,
+				A10000072900000300000001 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A10000072900000100000001 /* MediaLite */ = {
+			isa = PBXGroup;
+			children = (
+				A10000072900000400000001 /* App */,
+				A10000072900000500000001 /* Models */,
+				A10000072900001000000001 /* Services */,
+				A10000072900001200000001 /* ViewModels */,
+				A10000072900001300000001 /* Views */,
+				A10000072900000600000001 /* Utilities */,
+				A10000072900000700000001 /* Resources */,
+			);
+			path = MediaLite;
+			sourceTree = "<group>";
+		};
+		A10000072900000400000001 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900000100000001 /* MediaLiteApp.swift */,
+				A10000022900000200000001 /* ContentView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		A10000072900000500000001 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900000300000001 /* CompressionQuality.swift */,
+				A10000022900000400000001 /* ConversionMode.swift */,
+				A10000022900000500000001 /* MediaItem.swift */,
+				A10000022900000600000001 /* ProcessingResult.swift */,
+				A10000022900000700000001 /* HistoryRecord.swift */,
+				A10000022900000800000001 /* AppSettings.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A10000072900001000000001 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900002100000001 /* PhotoCompressorService.swift */,
+				A10000022900002400000001 /* VideoProcessorService.swift */,
+				A10000022900002500000001 /* HistoryStorageService.swift */,
+				A10000022900002600000001 /* PhotoLibraryService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		A10000072900000600000001 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900000900000001 /* Formatters.swift */,
+				A10000022900000A00000001 /* TempFileManager.swift */,
+				A10000022900000B00000001 /* DesignSystem.swift */,
+				A10000022900002200000001 /* ExifHelper.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		A10000072900000700000001 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900000C00000001 /* Assets.xcassets */,
+				A10000022900000D00000001 /* PrivacyInfo.xcprivacy */,
+				A10000022900001100000001 /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		A10000072900000200000001 /* MediaLiteTests */ = {
+			isa = PBXGroup;
+			children = (
+				A10000072900000800000001 /* ModelTests */,
+				A10000072900000900000001 /* ServiceTests */,
+				A10000072900001A00000001 /* ViewModelTests */,
+				A10000072900001100000001 /* PrivacyTests */,
+				A10000072900000A00000001 /* Helpers */,
+				A10000072900000B00000001 /* E2ETests */,
+				A10000072900001B00000001 /* AdversarialTests */,
+			);
+			path = MediaLiteTests;
+			sourceTree = "<group>";
+		};
+		A10000072900001B00000001 /* AdversarialTests */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900003E00000001 /* Tier5_AdversarialHardeningTests.swift */,
+			);
+			path = AdversarialTests;
+			sourceTree = "<group>";
+		};
+		A10000072900000800000001 /* ModelTests */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900000E00000001 /* CompressionRatioCalculatorTests.swift */,
+				A10000022900000F00000001 /* AppSettingsTests.swift */,
+			);
+			path = ModelTests;
+			sourceTree = "<group>";
+		};
+		A10000072900000900000001 /* ServiceTests */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900001000000001 /* TempFileManagerTests.swift */,
+				A10000022900002300000001 /* PhotoCompressorServiceTests.swift */,
+				A10000022900002700000001 /* VideoProcessorServiceTests.swift */,
+				A10000022900002800000001 /* HistoryStoreTests.swift */,
+				A10000022900002900000001 /* PhotoLibraryServiceTests.swift */,
+			);
+			path = ServiceTests;
+			sourceTree = "<group>";
+		};
+		A10000072900001100000001 /* PrivacyTests */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900002A00000001 /* PrivacyEnforcementTests.swift */,
+			);
+			path = PrivacyTests;
+			sourceTree = "<group>";
+		};
+		A10000072900000A00000001 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900001200000001 /* SyntheticAssetGenerator.swift */,
+				A10000022900001300000001 /* SyntheticAssetGeneratorTests.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		A10000072900000300000001 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A10000052900000100000001 /* MediaLite.app */,
+				A10000052900000200000001 /* MediaLiteTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A10000072900000B00000001 /* E2ETests */ = {
+			isa = PBXGroup;
+			children = (
+				A10000072900000C00000001 /* Tier1_FeatureCoverage */,
+				A10000072900000D00000001 /* Tier2_BoundaryAndCorner */,
+				A10000072900000E00000001 /* Tier3_CrossFeatureCombinations */,
+				A10000072900000F00000001 /* Tier4_RealWorldScenarios */,
+			);
+			path = E2ETests;
+			sourceTree = "<group>";
+		};
+		A10000072900000C00000001 /* Tier1_FeatureCoverage */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900001400000001 /* PhotoCompressionE2ETests.swift */,
+				A10000022900001500000001 /* VideoProcessingE2ETests.swift */,
+				A10000022900001600000001 /* HistoryAndSettingsE2ETests.swift */,
+				A10000022900001700000001 /* FormattingAndModelsE2ETests.swift */,
+				A10000022900001800000001 /* PrivacyAndSecurityE2ETests.swift */,
+			);
+			path = Tier1_FeatureCoverage;
+			sourceTree = "<group>";
+		};
+		A10000072900000D00000001 /* Tier2_BoundaryAndCorner */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900001900000001 /* MediaBoundaryE2ETests.swift */,
+				A10000022900001A00000001 /* CorruptionAndErrorE2ETests.swift */,
+				A10000022900001B00000001 /* ConcurrencyAndCancellationE2ETests.swift */,
+			);
+			path = Tier2_BoundaryAndCorner;
+			sourceTree = "<group>";
+		};
+		A10000072900000E00000001 /* Tier3_CrossFeatureCombinations */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900001C00000001 /* MediaCombinationsE2ETests.swift */,
+				A10000022900001D00000001 /* WorkflowPairwiseE2ETests.swift */,
+			);
+			path = Tier3_CrossFeatureCombinations;
+			sourceTree = "<group>";
+		};
+		A10000072900000F00000001 /* Tier4_RealWorldScenarios */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900001E00000001 /* VacationBatchWorkflowE2ETests.swift */,
+				A10000022900001F00000001 /* SocialMediaSharingWorkflowE2ETests.swift */,
+				A10000022900002000000001 /* DeviceStorageCleanupWorkflowE2ETests.swift */,
+			);
+			path = Tier4_RealWorldScenarios;
+			sourceTree = "<group>";
+		};
+		A10000072900001200000001 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900002E00000001 /* HomeViewModel.swift */,
+				A10000022900003000000001 /* CompressViewModel.swift */,
+				A10000022900003200000001 /* ConvertViewModel.swift */,
+				A10000022900003400000001 /* HistoryViewModel.swift */,
+				A10000022900003600000001 /* SettingsViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		A10000072900001300000001 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A10000072900001400000001 /* Components */,
+				A10000072900001500000001 /* Home */,
+				A10000072900001600000001 /* Compress */,
+				A10000072900001700000001 /* Convert */,
+				A10000072900001800000001 /* History */,
+				A10000072900001900000001 /* Settings */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A10000072900001400000001 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900002B00000001 /* LiquidGlassCard.swift */,
+				A10000022900002C00000001 /* SavingsBadge.swift */,
+				A10000022900002D00000001 /* StatMetricView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		A10000072900001500000001 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900002F00000001 /* HomeView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		A10000072900001600000001 /* Compress */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900003100000001 /* CompressView.swift */,
+			);
+			path = Compress;
+			sourceTree = "<group>";
+		};
+		A10000072900001700000001 /* Convert */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900003300000001 /* ConvertView.swift */,
+			);
+			path = Convert;
+			sourceTree = "<group>";
+		};
+		A10000072900001800000001 /* History */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900003500000001 /* HistoryView.swift */,
+			);
+			path = History;
+			sourceTree = "<group>";
+		};
+		A10000072900001900000001 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900003700000001 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		A10000072900001A00000001 /* ViewModelTests */ = {
+			isa = PBXGroup;
+			children = (
+				A10000022900003800000001 /* HomeViewModelTests.swift */,
+				A10000022900003900000001 /* CompressViewModelTests.swift */,
+				A10000022900003A00000001 /* ConvertViewModelTests.swift */,
+				A10000022900003B00000001 /* HistoryViewModelTests.swift */,
+				A10000022900003C00000001 /* SettingsViewModelTests.swift */,
+				A10000022900003D00000001 /* TabNavigationAndAccessibilityTests.swift */,
+			);
+			path = ViewModelTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A10000042900000100000001 /* MediaLite */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A10000082900000100000001 /* Build configuration list for PBXNativeTarget "MediaLite" */;
+			buildPhases = (
+				A10000092900000100000001 /* Sources */,
+				A10000062900000100000001 /* Frameworks */,
+				A100000A2900000100000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MediaLite;
+			productName = MediaLite;
+			productReference = A10000052900000100000001 /* MediaLite.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A10000042900000200000001 /* MediaLiteTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A10000082900000200000001 /* Build configuration list for PBXNativeTarget "MediaLiteTests" */;
+			buildPhases = (
+				A10000092900000200000001 /* Sources */,
+				A10000062900000200000001 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A100000B2900000100000001 /* PBXTargetDependency */,
+			);
+			name = MediaLiteTests;
+			productName = MediaLiteTests;
+			productReference = A10000052900000200000001 /* MediaLiteTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A10000002900000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					A10000042900000100000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					A10000042900000200000001 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = A10000042900000100000001;
+					};
+				};
+			};
+			buildConfigurationList = A10000082900000000000001 /* Build configuration list for PBXProject "MediaLite" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A10000072900000000000001;
+			productRefGroup = A10000072900000300000001 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A10000042900000100000001 /* MediaLite */,
+				A10000042900000200000001 /* MediaLiteTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A100000A2900000100000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000012900000C00000001 /* Assets.xcassets in Resources */,
+				A10000012900000D00000001 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A10000092900000100000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000012900000100000001 /* MediaLiteApp.swift in Sources */,
+				A10000012900000200000001 /* ContentView.swift in Sources */,
+				A10000012900000300000001 /* CompressionQuality.swift in Sources */,
+				A10000012900000400000001 /* ConversionMode.swift in Sources */,
+				A10000012900000500000001 /* MediaItem.swift in Sources */,
+				A10000012900000600000001 /* ProcessingResult.swift in Sources */,
+				A10000012900000700000001 /* HistoryRecord.swift in Sources */,
+				A10000012900000800000001 /* AppSettings.swift in Sources */,
+				A10000012900000900000001 /* Formatters.swift in Sources */,
+				A10000012900000A00000001 /* TempFileManager.swift in Sources */,
+				A10000012900000B00000001 /* DesignSystem.swift in Sources */,
+				A10000012900002100000001 /* PhotoCompressorService.swift in Sources */,
+				A10000012900002400000001 /* VideoProcessorService.swift in Sources */,
+				A10000012900002500000001 /* HistoryStorageService.swift in Sources */,
+				A10000012900002600000001 /* PhotoLibraryService.swift in Sources */,
+				A10000012900002200000001 /* ExifHelper.swift in Sources */,
+				A10000012900002B00000001 /* LiquidGlassCard.swift in Sources */,
+				A10000012900002C00000001 /* SavingsBadge.swift in Sources */,
+				A10000012900002D00000001 /* StatMetricView.swift in Sources */,
+				A10000012900002E00000001 /* HomeViewModel.swift in Sources */,
+				A10000012900002F00000001 /* HomeView.swift in Sources */,
+				A10000012900003000000001 /* CompressViewModel.swift in Sources */,
+				A10000012900003100000001 /* CompressView.swift in Sources */,
+				A10000012900003200000001 /* ConvertViewModel.swift in Sources */,
+				A10000012900003300000001 /* ConvertView.swift in Sources */,
+				A10000012900003400000001 /* HistoryViewModel.swift in Sources */,
+				A10000012900003500000001 /* HistoryView.swift in Sources */,
+				A10000012900003600000001 /* SettingsViewModel.swift in Sources */,
+				A10000012900003700000001 /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000092900000200000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000012900000E00000001 /* CompressionRatioCalculatorTests.swift in Sources */,
+				A10000012900000F00000001 /* AppSettingsTests.swift in Sources */,
+				A10000012900001000000001 /* TempFileManagerTests.swift in Sources */,
+				A10000012900002300000001 /* PhotoCompressorServiceTests.swift in Sources */,
+				A10000012900002700000001 /* VideoProcessorServiceTests.swift in Sources */,
+				A10000012900002800000001 /* HistoryStoreTests.swift in Sources */,
+				A10000012900002900000001 /* PhotoLibraryServiceTests.swift in Sources */,
+				A10000012900002A00000001 /* PrivacyEnforcementTests.swift in Sources */,
+				A10000012900001200000001 /* SyntheticAssetGenerator.swift in Sources */,
+				A10000012900001300000001 /* SyntheticAssetGeneratorTests.swift in Sources */,
+				A10000012900001400000001 /* PhotoCompressionE2ETests.swift in Sources */,
+				A10000012900001500000001 /* VideoProcessingE2ETests.swift in Sources */,
+				A10000012900001600000001 /* HistoryAndSettingsE2ETests.swift in Sources */,
+				A10000012900001700000001 /* FormattingAndModelsE2ETests.swift in Sources */,
+				A10000012900001800000001 /* PrivacyAndSecurityE2ETests.swift in Sources */,
+				A10000012900001900000001 /* MediaBoundaryE2ETests.swift in Sources */,
+				A10000012900001A00000001 /* CorruptionAndErrorE2ETests.swift in Sources */,
+				A10000012900001B00000001 /* ConcurrencyAndCancellationE2ETests.swift in Sources */,
+				A10000012900001C00000001 /* MediaCombinationsE2ETests.swift in Sources */,
+				A10000012900001D00000001 /* WorkflowPairwiseE2ETests.swift in Sources */,
+				A10000012900001E00000001 /* VacationBatchWorkflowE2ETests.swift in Sources */,
+				A10000012900001F00000001 /* SocialMediaSharingWorkflowE2ETests.swift in Sources */,
+				A10000012900002000000001 /* DeviceStorageCleanupWorkflowE2ETests.swift in Sources */,
+				A10000012900003800000001 /* HomeViewModelTests.swift in Sources */,
+				A10000012900003900000001 /* CompressViewModelTests.swift in Sources */,
+				A10000012900003A00000001 /* ConvertViewModelTests.swift in Sources */,
+				A10000012900003B00000001 /* HistoryViewModelTests.swift in Sources */,
+				A10000012900003C00000001 /* SettingsViewModelTests.swift in Sources */,
+				A10000012900003D00000001 /* TabNavigationAndAccessibilityTests.swift in Sources */,
+				A10000012900003E00000001 /* Tier5_AdversarialHardeningTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A100000B2900000100000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A10000042900000100000001 /* MediaLite */;
+			targetProxy = A10000032900000100000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		A100000C2900000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		A100000C2900000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_OPTIMIZATION_LEVEL = s;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		A100000C2900000100000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MediaLite/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.medialite.MediaLite;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		A100000C2900000100000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MediaLite/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.medialite.MediaLite;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		A100000C2900000200000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.medialite.MediaLiteTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MediaLite.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MediaLite";
+			};
+			name = Debug;
+		};
+		A100000C2900000200000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.medialite.MediaLiteTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MediaLite.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MediaLite";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A10000082900000000000001 /* Build configuration list for PBXProject "MediaLite" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A100000C2900000000000001 /* Debug */,
+				A100000C2900000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A10000082900000100000001 /* Build configuration list for PBXNativeTarget "MediaLite" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A100000C2900000100000001 /* Debug */,
+				A100000C2900000100000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A10000082900000200000001 /* Build configuration list for PBXNativeTarget "MediaLiteTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A100000C2900000200000001 /* Debug */,
+				A100000C2900000200000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A10000002900000000000001 /* Project object */;
+}
