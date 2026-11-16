@@ -9,6 +9,7 @@
 
 import XCTest
 import UniformTypeIdentifiers
+import Photos
 @testable import MediaLite
 
 // MARK: - Test Mocks

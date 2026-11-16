@@ -9,6 +9,7 @@
 
 import XCTest
 import AVFoundation
+import Photos
 @testable import MediaLite
 
 // MARK: - Test Mocks
