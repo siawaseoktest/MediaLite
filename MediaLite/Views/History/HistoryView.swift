@@ -78,7 +78,7 @@ public struct HistoryView: View {
     private var filterBar: some View {
         Picker("History Category", selection: $viewModel.selectedFilter) {
             ForEach(HistoryFilter.allCases) { filter in
-                Text(filter.rawValue).tag(filter)
+                Text(LocalizedStringKey(filter.rawValue)).tag(filter)
             }
         }
         .pickerStyle(.segmented)
@@ -90,11 +90,11 @@ public struct HistoryView: View {
     private var statsBanner: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text("\(viewModel.filteredItems.count) item\(viewModel.filteredItems.count == 1 ? "" : "s")")
+                Text("\(viewModel.filteredItems.count) items")
                     .font(DesignSystem.Fonts.caption)
                     .foregroundStyle(DesignSystem.Colors.secondaryText)
                 
-                Text(Formatters.formatBytes(viewModel.filteredStats.totalSavedBytes) + " saved")
+                Text("\(Formatters.formatBytes(viewModel.filteredStats.totalSavedBytes)) saved")
                     .font(DesignSystem.Fonts.headline)
                     .foregroundStyle(DesignSystem.Colors.primaryText)
             }
@@ -198,12 +198,22 @@ public struct HistoryView: View {
                 .font(DesignSystem.Fonts.headline)
                 .foregroundStyle(DesignSystem.Colors.primaryText)
             
-            Text(viewModel.selectedFilter == .all
-                 ? "No media files have been compressed or converted yet."
-                 : "No \(viewModel.selectedFilter.rawValue.lowercased()) have been processed yet.")
-                .font(DesignSystem.Fonts.subheadline)
-                .foregroundStyle(DesignSystem.Colors.secondaryText)
-                .multilineTextAlignment(.center)
+            if viewModel.selectedFilter == .all {
+                Text("No media files have been compressed or converted yet.")
+                    .font(DesignSystem.Fonts.subheadline)
+                    .foregroundStyle(DesignSystem.Colors.secondaryText)
+                    .multilineTextAlignment(.center)
+            } else if viewModel.selectedFilter == .photos {
+                Text("No photos have been processed yet.")
+                    .font(DesignSystem.Fonts.subheadline)
+                    .foregroundStyle(DesignSystem.Colors.secondaryText)
+                    .multilineTextAlignment(.center)
+            } else {
+                Text("No videos have been processed yet.")
+                    .font(DesignSystem.Fonts.subheadline)
+                    .foregroundStyle(DesignSystem.Colors.secondaryText)
+                    .multilineTextAlignment(.center)
+            }
             
             Spacer()
         }

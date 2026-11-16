@@ -7,6 +7,24 @@
 
 import Foundation
 
+/// Supported UI application languages.
+public enum AppLanguage: String, CaseIterable, Codable, Sendable {
+    case system = "system"
+    case japanese = "ja"
+    case english = "en"
+    
+    public var displayName: String {
+        switch self {
+        case .system:
+            return "System Default"
+        case .japanese:
+            return "日本語"
+        case .english:
+            return "English"
+        }
+    }
+}
+
 /// User preferences model with UserDefaults persistence backing.
 public struct AppSettings: Codable, Equatable, Sendable {
     
@@ -18,6 +36,7 @@ public struct AppSettings: Codable, Equatable, Sendable {
         public static let preserveMetadata = "com.medialite.settings.preserveMetadata"
         public static let deleteOriginalPrompt = "com.medialite.settings.deleteOriginalPrompt"
         public static let maxCacheAgeDays = "com.medialite.settings.maxCacheAgeDays"
+        public static let appLanguage = "com.medialite.settings.appLanguage"
     }
     
     // MARK: - Properties
@@ -26,6 +45,7 @@ public struct AppSettings: Codable, Equatable, Sendable {
     public var autoSaveToLibrary: Bool
     public var preserveMetadata: Bool
     public var deleteOriginalPrompt: Bool
+    public var appLanguage: AppLanguage
     public var maxCacheAgeDays: Int {
         didSet {
             maxCacheAgeDays = max(0, min(maxCacheAgeDays, 365))
@@ -65,7 +85,8 @@ public struct AppSettings: Codable, Equatable, Sendable {
         autoSaveToLibrary: Bool = false,
         preserveMetadata: Bool = true,
         deleteOriginalPrompt: Bool = false,
-        maxCacheAgeDays: Int = 7
+        maxCacheAgeDays: Int = 7,
+        appLanguage: AppLanguage = .system
     ) {
         self.defaultCompressionStrength = defaultCompressionStrength
         self.defaultVideoMode = defaultVideoMode
@@ -73,6 +94,7 @@ public struct AppSettings: Codable, Equatable, Sendable {
         self.preserveMetadata = preserveMetadata
         self.deleteOriginalPrompt = deleteOriginalPrompt
         self.maxCacheAgeDays = max(0, min(maxCacheAgeDays, 365))
+        self.appLanguage = appLanguage
     }
     
     /// Default factory values.
@@ -106,6 +128,11 @@ public struct AppSettings: Codable, Equatable, Sendable {
             settings.deleteOriginalPrompt = defaults.bool(forKey: Keys.deleteOriginalPrompt)
         }
         
+        if let langRaw = defaults.string(forKey: Keys.appLanguage),
+           let lang = AppLanguage(rawValue: langRaw) {
+            settings.appLanguage = lang
+        }
+        
         if defaults.object(forKey: Keys.maxCacheAgeDays) != nil {
             let cacheDays = defaults.integer(forKey: Keys.maxCacheAgeDays)
             if cacheDays < 0 {
@@ -128,6 +155,7 @@ public struct AppSettings: Codable, Equatable, Sendable {
         defaults.set(preserveMetadata, forKey: Keys.preserveMetadata)
         defaults.set(deleteOriginalPrompt, forKey: Keys.deleteOriginalPrompt)
         defaults.set(maxCacheAgeDays, forKey: Keys.maxCacheAgeDays)
+        defaults.set(appLanguage.rawValue, forKey: Keys.appLanguage)
     }
     
     /// Resets persisted user settings back to factory defaults.
@@ -139,6 +167,7 @@ public struct AppSettings: Codable, Equatable, Sendable {
         defaults.removeObject(forKey: Keys.preserveMetadata)
         defaults.removeObject(forKey: Keys.deleteOriginalPrompt)
         defaults.removeObject(forKey: Keys.maxCacheAgeDays)
+        defaults.removeObject(forKey: Keys.appLanguage)
         
         let defaultSettings = AppSettings.default
         defaultSettings.save(to: defaults)

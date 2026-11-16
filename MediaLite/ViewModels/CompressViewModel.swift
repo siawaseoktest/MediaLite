@@ -53,6 +53,7 @@ public final class CompressViewModel: ObservableObject {
     private var activeTask: Task<Void, Never>? = nil
     private var processedPickerItems: Set<PhotosPickerItem> = []
     private var pickerItemMap: [UUID: PhotosPickerItem] = [:]
+    public var hasUserCustomizedQuality: Bool = false
     
     // MARK: - Initialization
     public init(
@@ -68,6 +69,13 @@ public final class CompressViewModel: ObservableObject {
         self.tempFileManager = tempFileManager
         self.appSettings = appSettings
         self.selectedQuality = appSettings.defaultCompressionStrength
+    }
+    
+    /// Synchronizes quality with current settings if no active batch and not explicitly overridden.
+    public func syncWithDefaultSettingsIfIdle() {
+        guard !hasUserCustomizedQuality && !isProcessing && !isCompleted && selectedItems.isEmpty else { return }
+        let currentSettings = AppSettings.load()
+        self.selectedQuality = currentSettings.defaultCompressionStrength
     }
     
     // MARK: - Computed Statistics

@@ -90,21 +90,21 @@ public struct HomeView: View {
                     title: "Photos",
                     value: "\(viewModel.stats.photoCount)",
                     systemImage: "photo.fill",
-                    tintColor: .blue
+                    tintColor: DesignSystem.Colors.accent
                 )
                 
                 StatMetricView(
                     title: "Videos",
                     value: "\(viewModel.stats.videoCount)",
                     systemImage: "video.fill",
-                    tintColor: .indigo
+                    tintColor: DesignSystem.Colors.accent
                 )
                 
                 StatMetricView(
                     title: "Processed",
                     value: Formatters.formatBytes(viewModel.stats.totalOriginalBytes),
                     systemImage: "arrow.triangle.2.circlepath",
-                    tintColor: .teal
+                    tintColor: DesignSystem.Colors.accent
                 )
             }
         }
@@ -129,32 +129,26 @@ public struct HomeView: View {
                     HStack {
                         Image(systemName: "photo.stack.fill")
                             .font(.title3)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(DesignSystem.Colors.accent)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Compress")
                                 .font(DesignSystem.Fonts.headline)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(DesignSystem.Colors.primaryText)
                             Text("Photos & Images")
                                 .font(DesignSystem.Fonts.caption)
-                                .foregroundStyle(.white.opacity(0.8))
+                                .foregroundStyle(DesignSystem.Colors.secondaryText)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "chevron.right")
                             .font(.subheadline.bold())
-                            .foregroundStyle(.white.opacity(0.6))
+                            .foregroundStyle(DesignSystem.Colors.secondaryText.opacity(0.6))
                     }
                     .padding(DesignSystem.Metrics.paddingMedium)
-                    .background(
-                        LinearGradient(
-                            colors: [Color.blue, Color.blue.opacity(0.8)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Metrics.buttonCornerRadius, style: .continuous))
+                    .frame(maxWidth: .infinity, minHeight: 68)
+                    .liquidGlassCard(cornerRadius: DesignSystem.Metrics.buttonCornerRadius)
                 }
                 .accessibilityIdentifier("action_compress_photos")
                 
@@ -164,32 +158,26 @@ public struct HomeView: View {
                     HStack {
                         Image(systemName: "video.badge.plus")
                             .font(.title3)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(DesignSystem.Colors.accent)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Convert")
                                 .font(DesignSystem.Fonts.headline)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(DesignSystem.Colors.primaryText)
                             Text("Videos & MP4")
                                 .font(DesignSystem.Fonts.caption)
-                                .foregroundStyle(.white.opacity(0.8))
+                                .foregroundStyle(DesignSystem.Colors.secondaryText)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "chevron.right")
                             .font(.subheadline.bold())
-                            .foregroundStyle(.white.opacity(0.6))
+                            .foregroundStyle(DesignSystem.Colors.secondaryText.opacity(0.6))
                     }
                     .padding(DesignSystem.Metrics.paddingMedium)
-                    .background(
-                        LinearGradient(
-                            colors: [Color.indigo, Color.purple.opacity(0.8)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Metrics.buttonCornerRadius, style: .continuous))
+                    .frame(maxWidth: .infinity, minHeight: 68)
+                    .liquidGlassCard(cornerRadius: DesignSystem.Metrics.buttonCornerRadius)
                 }
                 .accessibilityIdentifier("action_convert_videos")
             }
@@ -254,11 +242,11 @@ public struct HomeView: View {
         HStack(spacing: 12) {
             Image(systemName: item.mediaType.lowercased() == "photo" ? "photo.fill" : "video.fill")
                 .font(.title3)
-                .foregroundStyle(item.mediaType.lowercased() == "photo" ? Color.blue : Color.indigo)
+                .foregroundStyle(DesignSystem.Colors.accent)
                 .frame(width: 32, height: 32)
                 .background(
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(item.mediaType.lowercased() == "photo" ? Color.blue.opacity(0.12) : Color.indigo.opacity(0.12))
+                        .fill(DesignSystem.Colors.accent.opacity(0.12))
                 )
             
             VStack(alignment: .leading, spacing: 2) {

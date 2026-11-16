@@ -292,4 +292,23 @@ final class CompressViewModelTests: XCTestCase {
         viewModel.cancelCompression()
         XCTAssertTrue(viewModel.compressionResults.isEmpty)
     }
+
+    @MainActor
+    func testCompressViewModelSyncWithDefaultSettings() {
+        let testDefaults = UserDefaults(suiteName: "com.medialite.tests.compressviewmodel")!
+        testDefaults.removePersistentDomain(forName: "com.medialite.tests.compressviewmodel")
+        
+        var customSettings = AppSettings()
+        customSettings.defaultCompressionStrength = .high
+        customSettings.save(to: testDefaults)
+
+        let viewModel = CompressViewModel(
+            compressor: mockCompressor,
+            historyStorage: historyStore,
+            photoLibrary: mockLibrary,
+            appSettings: customSettings
+        )
+
+        XCTAssertEqual(viewModel.selectedQuality, .high)
+    }
 }

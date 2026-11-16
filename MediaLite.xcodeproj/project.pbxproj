@@ -68,6 +68,8 @@
 		A10000012900003C00000001 /* SettingsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003C00000001 /* SettingsViewModelTests.swift */; };
 		A10000012900003D00000001 /* TabNavigationAndAccessibilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003D00000001 /* TabNavigationAndAccessibilityTests.swift */; };
 		A10000012900003E00000001 /* Tier5_AdversarialHardeningTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000022900003E00000001 /* Tier5_AdversarialHardeningTests.swift */; };
+		A10000012900009000000001 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = A10000022900009000000001 /* Localizable.strings */; };
+		A10000012900009300000001 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A10000022900009300000001 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -145,6 +147,10 @@
 		A10000022900003C00000001 /* SettingsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModelTests.swift; sourceTree = "<group>"; };
 		A10000022900003D00000001 /* TabNavigationAndAccessibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabNavigationAndAccessibilityTests.swift; sourceTree = "<group>"; };
 		A10000022900003E00000001 /* Tier5_AdversarialHardeningTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tier5_AdversarialHardeningTests.swift; sourceTree = "<group>"; };
+		A10000022900009100000001 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		A10000022900009200000001 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
+		A10000022900009400000001 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A10000022900009500000001 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -238,6 +244,8 @@
 				A10000022900000C00000001 /* Assets.xcassets */,
 				A10000022900000D00000001 /* PrivacyInfo.xcprivacy */,
 				A10000022900001100000001 /* Info.plist */,
+				A10000022900009000000001 /* Localizable.strings */,
+				A10000022900009300000001 /* InfoPlist.strings */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -513,6 +521,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				ja,
 				Base,
 			);
 			mainGroup = A10000072900000000000001;
@@ -533,10 +542,33 @@
 			files = (
 				A10000012900000C00000001 /* Assets.xcassets in Resources */,
 				A10000012900000D00000001 /* PrivacyInfo.xcprivacy in Resources */,
+				A10000012900009000000001 /* Localizable.strings in Resources */,
+				A10000012900009300000001 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		A10000022900009000000001 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A10000022900009100000001 /* en */,
+				A10000022900009200000001 /* ja */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		A10000022900009300000001 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A10000022900009400000001 /* en */,
+				A10000022900009500000001 /* ja */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin PBXSourcesBuildPhase section */
 		A10000092900000100000001 /* Sources */ = {

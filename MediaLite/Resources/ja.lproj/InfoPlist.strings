@@ -1,0 +1,7 @@
+/* 
+  InfoPlist.strings (Japanese)
+  MediaLite
+*/
+
+"CFBundleDisplayName" = "MediaLite";
+"NSPhotoLibraryAddUsageDescription" = "MediaLiteは圧縮した写真や変換した動画を写真ライブラリに保存するためにアクセス権限を必要とします。";

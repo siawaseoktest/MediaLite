@@ -82,7 +82,7 @@ public struct SavingsBadge: View {
                 .strokeBorder(tintColor.opacity(0.25), lineWidth: 0.5)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityDescription)
+        .accessibilityLabel(LocalizedStringKey(accessibilityDescription))
         .accessibilityAddTraits(.isStaticText)
         .transaction { transaction in
             if reduceMotion {

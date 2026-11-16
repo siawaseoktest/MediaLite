@@ -19,6 +19,9 @@ public enum AppTab: Int, CaseIterable, Identifiable, Hashable, Sendable {
     case history = 3
     case settings = 4
     
+    public static let photos = AppTab.compress
+    public static let videos = AppTab.convert
+    
     public var id: Int { rawValue }
     
     public var title: String {
@@ -26,9 +29,9 @@ public enum AppTab: Int, CaseIterable, Identifiable, Hashable, Sendable {
         case .home:
             return "Home"
         case .compress:
-            return "Compress"
+            return "Photos"
         case .convert:
-            return "Convert"
+            return "Videos"
         case .history:
             return "History"
         case .settings:
@@ -41,9 +44,9 @@ public enum AppTab: Int, CaseIterable, Identifiable, Hashable, Sendable {
         case .home:
             return "house"
         case .compress:
-            return "arrow.down.circle"
+            return "photo"
         case .convert:
-            return "arrow.triangle.2.circlepath"
+            return "video"
         case .history:
             return "clock.arrow.circlepath"
         case .settings:
@@ -56,9 +59,9 @@ public enum AppTab: Int, CaseIterable, Identifiable, Hashable, Sendable {
         case .home:
             return "house.fill"
         case .compress:
-            return "arrow.down.circle.fill"
+            return "photo.fill"
         case .convert:
-            return "arrow.triangle.2.circlepath.circle.fill"
+            return "video.fill"
         case .history:
             return "clock.arrow.circlepath"
         case .settings:
@@ -86,9 +89,22 @@ public enum AppTab: Int, CaseIterable, Identifiable, Hashable, Sendable {
 
 public struct ContentView: View {
     @State public var selectedTab: AppTab
+    @AppStorage(AppSettings.Keys.appLanguage) private var appLanguageRaw: String = AppLanguage.system.rawValue
     
     public init(selectedTab: AppTab = .home) {
         _selectedTab = State(initialValue: selectedTab)
+    }
+    
+    private var selectedLocale: Locale {
+        let lang = AppLanguage(rawValue: appLanguageRaw) ?? .system
+        switch lang {
+        case .system:
+            return Locale.autoupdatingCurrent
+        case .japanese:
+            return Locale(identifier: "ja")
+        case .english:
+            return Locale(identifier: "en")
+        }
     }
     
     public var body: some View {
@@ -96,7 +112,7 @@ public struct ContentView: View {
             HomeView(selectedTab: $selectedTab)
                 .tabItem {
                     Label(
-                        AppTab.home.title,
+                        LocalizedStringKey(AppTab.home.title),
                         systemImage: selectedTab == .home ? AppTab.home.selectedIconName : AppTab.home.iconName
                     )
                 }
@@ -106,7 +122,7 @@ public struct ContentView: View {
             CompressView()
                 .tabItem {
                     Label(
-                        AppTab.compress.title,
+                        LocalizedStringKey(AppTab.compress.title),
                         systemImage: selectedTab == .compress ? AppTab.compress.selectedIconName : AppTab.compress.iconName
                     )
                 }
@@ -116,7 +132,7 @@ public struct ContentView: View {
             ConvertView()
                 .tabItem {
                     Label(
-                        AppTab.convert.title,
+                        LocalizedStringKey(AppTab.convert.title),
                         systemImage: selectedTab == .convert ? AppTab.convert.selectedIconName : AppTab.convert.iconName
                     )
                 }
@@ -126,7 +142,7 @@ public struct ContentView: View {
             HistoryView()
                 .tabItem {
                     Label(
-                        AppTab.history.title,
+                        LocalizedStringKey(AppTab.history.title),
                         systemImage: selectedTab == .history ? AppTab.history.selectedIconName : AppTab.history.iconName
                     )
                 }
@@ -136,7 +152,7 @@ public struct ContentView: View {
             SettingsView()
                 .tabItem {
                     Label(
-                        AppTab.settings.title,
+                        LocalizedStringKey(AppTab.settings.title),
                         systemImage: selectedTab == .settings ? AppTab.settings.selectedIconName : AppTab.settings.iconName
                     )
                 }
@@ -144,5 +160,6 @@ public struct ContentView: View {
                 .accessibilityIdentifier(AppTab.settings.accessibilityIdentifier)
         }
         .tint(DesignSystem.Colors.accent)
+        .environment(\.locale, selectedLocale)
     }
 }

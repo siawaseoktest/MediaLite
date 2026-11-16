@@ -1,0 +1,133 @@
+/* 
+  Localizable.strings (Japanese)
+  MediaLite
+*/
+
+/* --- Navigation & Tabs --- */
+"MediaLite" = "MediaLite";
+"Home" = "ホーム";
+"Compress" = "圧縮";
+"Convert" = "変換";
+"History" = "履歴";
+"Settings" = "設定";
+
+/* --- Home Tab --- */
+"LIFETIME SAVINGS" = "合計削減容量";
+"Photos" = "写真";
+"Videos" = "動画";
+"Processed" = "処理済み";
+"Quick Actions" = "クイック操作";
+"Photos & Images" = "写真・画像";
+"Videos & MP4" = "動画・MP4";
+"Recent Activity" = "最近の履歴";
+"See All" = "すべて表示";
+"No Media Processed Yet" = "処理履歴はありません";
+"Compress photos or convert videos to see lifetime savings and processing history here." = "写真の圧縮や動画の変換を行うと、削減容量と処理履歴がここに表示されます。";
+
+/* --- Compress Tab --- */
+"Compression Quality" = "圧縮品質";
+"Quality" = "品質";
+"Low (High Quality)" = "低圧縮 (最高画質)";
+"Medium (Balanced)" = "標準 (バランス)";
+"High (Maximum Savings)" = "高圧縮 (容量削減優先)";
+"Light compression (~90% quality). Preserves maximum detail, ideal for archival or printing." = "軽度の圧縮（約90%画質）。ディテールを最大限に保持し、保存や印刷に最適です。";
+"Balanced compression (~75% quality). Greatly reduces file size with imperceptible quality loss." = "バランス重視の圧縮（約75%画質）。見た目の劣化を抑えつつ、ファイル容量を大幅に削減します。";
+"Maximum compression (~55% quality). Maximizes storage savings, ideal for fast sharing or email." = "最大限の圧縮（約55%画質）。空き容量の確保を最優先し、共有やメール送信に最適です。";
+"Select Photos to Compress" = "圧縮する写真を選択";
+"Supports JPEG, HEIC, and PNG.\nSelect multiple photos for batch compression." = "JPEG、HEIC、PNGに対応。\n複数選択して一括圧縮できます。";
+"Compress %lld Photos" = "%lld枚の写真を圧縮";
+"Compress %lld Photo" = "%lld枚の写真を圧縮";
+"Selected Photos (%lld)" = "選択中の写真 (%lld)";
+"Add More" = "写真を追加";
+"Clear" = "クリア";
+"Compressing %lld of %lld..." = "%2$lld枚中%1$lld枚を圧縮中...";
+"Cancel" = "キャンセル";
+"BATCH COMPRESSION COMPLETE" = "一括圧縮が完了しました";
+"Saved to Photos" = "写真に保存済み";
+"Save All to Photo Library" = "すべて写真ライブラリに保存";
+"Done" = "完了";
+"Error" = "エラー";
+"OK" = "OK";
+"An unknown error occurred." = "不明なエラーが発生しました。";
+
+/* --- Convert Tab --- */
+"Select Video to Convert" = "変換する動画を選択";
+"Supports MOV, MP4, and HDR videos.\nReduce size or transcode to universal H.264/MP4." = "MOV、MP4、HDR動画に対応。\n容量削減や汎用的なH.264/MP4への変換が可能です。";
+"Original Size: %@" = "元サイズ: %@";
+"Change" = "変更";
+"Duration" = "再生時間";
+"Resolution" = "解像度";
+"HDR" = "HDR";
+"Yes" = "対応";
+"SDR" = "SDR";
+"Conversion Mode" = "変換モード";
+"Reduce Size" = "容量縮小";
+"Improve Compatibility (H.264)" = "互換性向上 (H.264)";
+"Compress & Convert (H.264)" = "圧縮＋H.264変換";
+"Compresses video using the original codec to save storage space while maintaining visual quality." = "元のコーデックのまま画質を保ちながら解像度・ビットレートを最適化して容量を削減します。";
+"Converts modern formats (HEVC, MOV) to universal H.264 and AAC in an MP4 container for playback on all devices." = "最新の形式（HEVC、MOV）を、幅広い機器で再生可能な標準MP4（H.264 / AAC）に変換します。";
+"Combines aggressive file size reduction with universal H.264 conversion for web and cross-platform sharing." = "ファイル容量の大幅な削減と標準H.264形式への変換を同時に行い、WebやSNS共有に最適化します。";
+"Compression Strength" = "圧縮強度";
+"Strength" = "強度";
+"Processing Options" = "処理オプション";
+"Universal MP4" = "Universal MP4";
+"HDR → SDR" = "HDR → SDR";
+"Start Video Conversion" = "動画変換を開始";
+"Preparing conversion..." = "変換を準備中...";
+"Cancel Conversion" = "変換をキャンセル";
+"CONVERSION COMPLETE" = "変換完了";
+"Save Video to Photo Library" = "動画を写真ライブラリに保存";
+"Convert Another Video" = "別の動画を変換";
+
+/* --- History Tab --- */
+"Clear All History" = "すべての履歴を消去";
+"This action permanently removes all compression records from your local history archive. Original and processed media files will not be deleted." = "この操作により、ローカル履歴からすべての圧縮記録が完全に削除されます。端末に保存された写真や動画ファイルは削除されません。";
+"History Category" = "履歴カテゴリ";
+"All" = "すべて";
+"%lld items" = "%lld件のアイテム";
+"%lld item" = "%lld件のアイテム";
+"%@ saved" = "%@ 削減";
+"Delete" = "削除";
+"No History Found" = "履歴がありません";
+"No media files have been compressed or converted yet." = "圧縮または変換されたメディアはまだありません。";
+"No photos have been processed yet." = "写真の処理履歴はまだありません。";
+"No videos have been processed yet." = "動画の処理履歴はまだありません。";
+
+/* --- Settings Tab --- */
+"Default Compression Settings" = "デフォルト圧縮設定";
+"Photo Quality" = "写真品質";
+"Video Mode" = "動画モード";
+"Photo & Video Preferences" = "写真・動画の設定";
+"Auto-Save to Photo Library" = "写真ライブラリへ自動保存";
+"Preserve EXIF & Metadata" = "EXIF・メタデータを保持";
+"Prompt Before Deleting Original" = "元ファイル削除前に確認";
+"Temporary Storage & Cache" = "一時ストレージとキャッシュ";
+"Cache Footprint" = "キャッシュ使用量";
+"Device Free Storage" = "端末の空き容量";
+"Clear Temporary Cache" = "一時キャッシュを消去";
+"Clear Cache" = "キャッシュを消去";
+"This removes all sandboxed temporary processing files. Completed exports saved to your Photo Library will remain safe." = "一時処理ファイルをすべて消去します。写真ライブラリに保存済みのメディアは保持されます。";
+"Reset All Preferences" = "すべての設定をリセット";
+"Reset to Factory Defaults" = "初期設定に戻す";
+"All compression and conversion preferences will be restored to their original default settings." = "すべての圧縮および変換設定が初期値に復元されます。";
+"Privacy & Security" = "プライバシーとセキュリティ";
+"100% On-Device Processing" = "完全オンデバイス処理";
+"MediaLite operates strictly offline. No photos, videos, or metadata are ever transmitted, tracked, or collected over the network." = "MediaLiteは完全オフラインで動作します。写真、動画、メタデータがネットワーク経由で送信、追跡、収集されることは一切ありません。";
+"Photo Library Add-Only: MediaLite can only export newly compressed items and cannot inspect or delete existing photos." = "写真ライブラリへの追加専用: MediaLiteは圧縮・変換したメディアの新規保存のみを行い、既存の写真の閲覧や削除は行いません。";
+"Reset All Preferences to Defaults" = "すべての設定を初期状態に戻す";
+"Language" = "言語";
+"System Default" = "システム設定に従う";
+"Japanese" = "日本語";
+"English" = "English";
+
+/* --- Formatter & Savings Badge --- */
+"No size change" = "サイズ変更なし";
+"Saved %@ (-%@%%)" = "%@ 削減 (-%@%%)";
+"Increased by %@ (+%@%%)" = "%@ 増加 (+%@%%)";
+"No change in file size" = "ファイルサイズの変更なし";
+"%@ percent reduction in file size" = "%@%% サイズ削減";
+"Saved %@, %@ percent reduction in file size" = "%@ 削減 (%@%% 削減)";
+"%@ percent increase in file size" = "%@%% サイズ増加";
+"File size increased by %@, %@ percent increase" = "%@ 増加 (%@%% 増加)";
+"Total Space Saved" = "合計削減容量";
+"Photos Compressed" = "圧縮した写真";

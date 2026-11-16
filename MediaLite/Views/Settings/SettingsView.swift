@@ -26,14 +26,20 @@ public struct SettingsView: View {
                 // Section 2: Photo & Video Preferences
                 preferencesSection
                 
-                // Section 3: Storage & Cache Management
+                // Section 3: Language
+                languageSection
+                
+                // Section 4: Storage & Cache Management
                 cacheSection
                 
-                // Section 4: Privacy Assurance
+                // Section 5: Privacy Assurance
                 privacyAssuranceSection
                 
-                // Section 5: Reset Preferences
+                // Section 6: Reset Preferences
                 resetSection
+            }
+            .safeAreaInset(edge: .bottom) {
+                Color.clear.frame(height: 36)
             }
             .navigationTitle("Settings")
             .confirmationDialog(
@@ -72,7 +78,7 @@ public struct SettingsView: View {
         Section(header: Text("Default Compression Settings")) {
             Picker("Photo Quality", selection: $viewModel.settings.defaultCompressionStrength) {
                 ForEach(CompressionStrength.allCases, id: \.self) { strength in
-                    Text(strength.displayName).tag(strength)
+                    Text(LocalizedStringKey(strength.displayName)).tag(strength)
                 }
             }
             .onChange(of: viewModel.settings.defaultCompressionStrength) { _, _ in
@@ -82,7 +88,7 @@ public struct SettingsView: View {
             
             Picker("Video Mode", selection: $viewModel.settings.defaultVideoMode) {
                 ForEach(VideoProcessingMode.allCases, id: \.self) { mode in
-                    Text(mode.title).tag(mode)
+                    Text(LocalizedStringKey(mode.title)).tag(mode)
                 }
             }
             .onChange(of: viewModel.settings.defaultVideoMode) { _, _ in
@@ -113,6 +119,22 @@ public struct SettingsView: View {
                     viewModel.updateSettings()
                 }
                 .accessibilityIdentifier("settings_toggle_delete_prompt")
+        }
+    }
+    
+    // MARK: - Language Section
+    
+    private var languageSection: some View {
+        Section(header: Text("Language")) {
+            Picker("Language", selection: $viewModel.settings.appLanguage) {
+                ForEach(AppLanguage.allCases, id: \.self) { lang in
+                    Text(LocalizedStringKey(lang.displayName)).tag(lang)
+                }
+            }
+            .onChange(of: viewModel.settings.appLanguage) { _, _ in
+                viewModel.updateSettings()
+            }
+            .accessibilityIdentifier("settings_picker_language")
         }
     }
     

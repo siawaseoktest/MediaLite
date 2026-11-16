@@ -186,4 +186,32 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertFalse(settings.preserveMetadata)
         XCTAssertTrue(settings.deleteOriginalPrompt)
     }
+    
+    func testAppLanguageSaveAndLoadAndReset() {
+        // Default check
+        let defaultSettings = AppSettings.default
+        XCTAssertEqual(defaultSettings.appLanguage, .system)
+        
+        // Mutate and save
+        var settings = AppSettings()
+        settings.appLanguage = .japanese
+        settings.save(to: testDefaults)
+        
+        // Load
+        let loaded = AppSettings.load(from: testDefaults)
+        XCTAssertEqual(loaded.appLanguage, .japanese)
+        
+        // Mutate to english
+        var settingsEn = AppSettings()
+        settingsEn.appLanguage = .english
+        settingsEn.save(to: testDefaults)
+        let loadedEn = AppSettings.load(from: testDefaults)
+        XCTAssertEqual(loadedEn.appLanguage, .english)
+        
+        // Reset
+        let resetSettings = AppSettings.reset(userDefaults: testDefaults)
+        XCTAssertEqual(resetSettings.appLanguage, .system)
+        let loadedAfterReset = AppSettings.load(from: testDefaults)
+        XCTAssertEqual(loadedAfterReset.appLanguage, .system)
+    }
 }

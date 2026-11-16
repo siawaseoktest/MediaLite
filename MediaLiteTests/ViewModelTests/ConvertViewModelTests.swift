@@ -303,4 +303,69 @@ final class ConvertViewModelTests: XCTestCase {
         XCTAssertNil(viewModel.videoMetadata)
         XCTAssertFalse(viewModel.isCompleted)
     }
+
+    @MainActor
+    func testConvertViewModelMultiOptionTogglesAndEnforceAtLeastOne() {
+        let viewModel = ConvertViewModel(
+            videoProcessor: mockProcessor,
+            historyStorage: historyStore,
+            photoLibrary: mockLibrary
+        )
+
+        // Initial default from app settings (.reduceSize or .compressAndConvert)
+        XCTAssertTrue(viewModel.optionCompress || viewModel.optionUniversalMP4 || viewModel.optionToneMapping)
+
+        // Turn all on
+        viewModel.applyModeSelection(.compressAndConvert)
+        XCTAssertTrue(viewModel.optionCompress)
+        XCTAssertTrue(viewModel.optionUniversalMP4)
+        XCTAssertTrue(viewModel.optionToneMapping)
+        XCTAssertEqual(viewModel.selectedMode, .compressAndConvert)
+
+        // Toggle Compress off -> Universal MP4 + ToneMapping still active
+        viewModel.toggleOptionCompress()
+        XCTAssertFalse(viewModel.optionCompress)
+        XCTAssertTrue(viewModel.optionUniversalMP4)
+        XCTAssertEqual(viewModel.selectedMode, .improveCompatibility)
+
+        // Toggle Universal MP4 off -> ToneMapping still active
+        viewModel.toggleOptionUniversalMP4()
+        XCTAssertFalse(viewModel.optionUniversalMP4)
+        XCTAssertTrue(viewModel.optionToneMapping)
+
+        // Attempt to toggle the last remaining active option (ToneMapping) off -> MUST NOT turn off (validation)
+        viewModel.toggleOptionToneMapping()
+        XCTAssertTrue(viewModel.optionToneMapping, "At least one option must remain active at all times")
+
+        // Re-enable Compress
+        viewModel.toggleOptionCompress()
+        XCTAssertTrue(viewModel.optionCompress)
+        // Now ToneMapping can be toggled off because Compress is on
+        viewModel.toggleOptionToneMapping()
+        XCTAssertFalse(viewModel.optionToneMapping)
+        XCTAssertEqual(viewModel.selectedMode, .reduceSize)
+    }
+
+    @MainActor
+    func testConvertViewModelSyncWithDefaultSettings() {
+        let testDefaults = UserDefaults(suiteName: "com.medialite.tests.convertviewmodel")!
+        testDefaults.removePersistentDomain(forName: "com.medialite.tests.convertviewmodel")
+        
+        var customSettings = AppSettings()
+        customSettings.defaultVideoMode = .improveCompatibility
+        customSettings.defaultCompressionStrength = .high
+        customSettings.save(to: testDefaults)
+
+        let viewModel = ConvertViewModel(
+            videoProcessor: mockProcessor,
+            historyStorage: historyStore,
+            photoLibrary: mockLibrary,
+            appSettings: customSettings
+        )
+
+        XCTAssertEqual(viewModel.selectedMode, .improveCompatibility)
+        XCTAssertEqual(viewModel.selectedStrength, .high)
+        XCTAssertFalse(viewModel.optionCompress)
+        XCTAssertTrue(viewModel.optionUniversalMP4)
+    }
 }

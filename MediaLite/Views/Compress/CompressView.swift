@@ -43,6 +43,9 @@ public struct CompressView: View {
             } message: {
                 Text(viewModel.errorMessage ?? "An unknown error occurred.")
             }
+            .onAppear {
+                viewModel.syncWithDefaultSettingsIfIdle()
+            }
         }
     }
     
@@ -68,7 +71,7 @@ public struct CompressView: View {
                     HStack {
                         Image(systemName: "arrow.down.circle.fill")
                             .font(.headline)
-                        Text("Compress \(viewModel.selectedItems.count) Photo\(viewModel.selectedItems.count == 1 ? "" : "s")")
+                        Text("Compress \(viewModel.selectedItems.count) Photos")
                             .font(DesignSystem.Fonts.headline)
                     }
                     .frame(maxWidth: .infinity)
@@ -86,22 +89,30 @@ public struct CompressView: View {
     
     private var qualitySelectorSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Compression Quality")
-                .font(DesignSystem.Fonts.headline)
-                .foregroundStyle(DesignSystem.Colors.primaryText)
-            
-            Picker("Quality", selection: $viewModel.selectedQuality) {
-                ForEach(CompressionStrength.allCases, id: \.self) { strength in
-                    Text(strength.displayName).tag(strength)
+            HStack {
+                Text("Photo Quality")
+                    .font(DesignSystem.Fonts.headline)
+                    .foregroundStyle(DesignSystem.Colors.primaryText)
+                
+                Spacer()
+                
+                Picker("Photo Quality", selection: $viewModel.selectedQuality) {
+                    ForEach(CompressionStrength.allCases, id: \.self) { strength in
+                        Text(LocalizedStringKey(strength.displayName)).tag(strength)
+                    }
                 }
+                .pickerStyle(.menu)
+                .tint(DesignSystem.Colors.accent)
+                .onChange(of: viewModel.selectedQuality) { _, _ in
+                    viewModel.hasUserCustomizedQuality = true
+                }
+                .accessibilityIdentifier("picker_compression_quality")
             }
-            .pickerStyle(.segmented)
-            .accessibilityIdentifier("picker_compression_quality")
             
-            Text(viewModel.selectedQuality.localizedDescription)
+            Text(LocalizedStringKey(viewModel.selectedQuality.localizedDescription))
                 .font(DesignSystem.Fonts.caption)
                 .foregroundStyle(DesignSystem.Colors.secondaryText)
-                .padding(.horizontal, 4)
+                .padding(.horizontal, 2)
         }
         .padding(DesignSystem.Metrics.cardPadding)
         .liquidGlassCard()
@@ -115,10 +126,16 @@ public struct CompressView: View {
             maxSelectionCount: 0,
             matching: .images
         ) {
-            VStack(spacing: 14) {
-                Image(systemName: "photo.badge.plus")
-                    .font(.system(size: 44))
-                    .foregroundStyle(DesignSystem.Colors.accent)
+            VStack(spacing: 16) {
+                ZStack {
+                    Circle()
+                        .fill(DesignSystem.Colors.accent.opacity(0.12))
+                        .frame(width: 72, height: 72)
+                    
+                    Image(systemName: "photo.badge.plus")
+                        .font(.system(size: 32, weight: .semibold))
+                        .foregroundStyle(DesignSystem.Colors.accent)
+                }
                 
                 Text("Select Photos to Compress")
                     .font(DesignSystem.Fonts.headline)
@@ -133,6 +150,13 @@ public struct CompressView: View {
             .padding(.vertical, 40)
             .padding(.horizontal, DesignSystem.Metrics.cardPadding)
             .liquidGlassCard()
+            .overlay {
+                RoundedRectangle(cornerRadius: DesignSystem.Metrics.cardCornerRadius, style: .continuous)
+                    .strokeBorder(
+                        DesignSystem.Colors.accent.opacity(0.35),
+                        style: StrokeStyle(lineWidth: 1.5, dash: [6, 4])
+                    )
+            }
         }
         .accessibilityIdentifier("photos_picker_button")
     }
@@ -293,7 +317,7 @@ public struct CompressView: View {
                 } label: {
                     HStack {
                         Image(systemName: viewModel.isSavedToLibrary ? "checkmark.circle.fill" : "square.and.arrow.down.fill")
-                        Text(viewModel.isSavedToLibrary ? "Saved to Photos" : "Save All to Photo Library")
+                        Text(LocalizedStringKey(viewModel.isSavedToLibrary ? "Saved to Photos" : "Save All to Photo Library"))
                     }
                     .frame(maxWidth: .infinity)
                     .padding(DesignSystem.Metrics.paddingMedium)

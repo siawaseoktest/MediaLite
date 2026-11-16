@@ -1,0 +1,7 @@
+/* 
+  InfoPlist.strings (English)
+  MediaLite
+*/
+
+"CFBundleDisplayName" = "MediaLite";
+"NSPhotoLibraryAddUsageDescription" = "MediaLite requires permission to save compressed photos and converted videos to your photo library.";

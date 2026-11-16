@@ -67,6 +67,10 @@ public final class ConvertViewModel: ObservableObject {
     // MARK: - Configuration
     @Published public var selectedMode: VideoProcessingMode
     @Published public var selectedStrength: CompressionStrength
+    @Published public var optionCompress: Bool = true
+    @Published public var optionUniversalMP4: Bool = true
+    @Published public var optionToneMapping: Bool = true
+    public var hasUserCustomizedMode: Bool = false
     
     // MARK: - Live Progress
     @Published public var isConverting: Bool = false
@@ -103,6 +107,96 @@ public final class ConvertViewModel: ObservableObject {
         self.appSettings = appSettings
         self.selectedMode = appSettings.defaultVideoMode
         self.selectedStrength = appSettings.defaultCompressionStrength
+        
+        switch appSettings.defaultVideoMode {
+        case .reduceSize:
+            self.optionCompress = true
+            self.optionUniversalMP4 = false
+            self.optionToneMapping = false
+        case .improveCompatibility:
+            self.optionCompress = false
+            self.optionUniversalMP4 = true
+            self.optionToneMapping = true
+        case .compressAndConvert:
+            self.optionCompress = true
+            self.optionUniversalMP4 = true
+            self.optionToneMapping = true
+        }
+    }
+    
+    // MARK: - Multi-Option Toggle Controls (Enforcing At Least One Active)
+    
+    public func toggleOptionCompress() {
+        if optionCompress {
+            guard optionUniversalMP4 || optionToneMapping else { return }
+            optionCompress = false
+        } else {
+            optionCompress = true
+        }
+        hasUserCustomizedMode = true
+        updateModeFromOptions()
+    }
+    
+    public func toggleOptionUniversalMP4() {
+        if optionUniversalMP4 {
+            guard optionCompress || optionToneMapping else { return }
+            optionUniversalMP4 = false
+        } else {
+            optionUniversalMP4 = true
+        }
+        hasUserCustomizedMode = true
+        updateModeFromOptions()
+    }
+    
+    public func toggleOptionToneMapping() {
+        if optionToneMapping {
+            guard optionCompress || optionUniversalMP4 else { return }
+            optionToneMapping = false
+        } else {
+            optionToneMapping = true
+        }
+        hasUserCustomizedMode = true
+        updateModeFromOptions()
+    }
+    
+    private func updateModeFromOptions() {
+        if optionCompress && optionUniversalMP4 {
+            selectedMode = .compressAndConvert
+        } else if optionUniversalMP4 {
+            selectedMode = .improveCompatibility
+        } else if optionCompress {
+            selectedMode = .reduceSize
+        } else {
+            selectedMode = .improveCompatibility
+        }
+    }
+    
+    public func applyModeSelection(_ mode: VideoProcessingMode) {
+        selectedMode = mode
+        hasUserCustomizedMode = true
+        switch mode {
+        case .reduceSize:
+            optionCompress = true
+            optionUniversalMP4 = false
+            optionToneMapping = false
+        case .improveCompatibility:
+            optionCompress = false
+            optionUniversalMP4 = true
+            optionToneMapping = true
+        case .compressAndConvert:
+            optionCompress = true
+            optionUniversalMP4 = true
+            optionToneMapping = true
+        }
+    }
+    
+    /// Synchronizes mode & strength with current settings if idle and not explicitly overridden.
+    public func syncWithDefaultSettingsIfIdle() {
+        guard !hasUserCustomizedMode && !isConverting && !isCompleted && selectedVideoURL == nil else { return }
+        let currentSettings = AppSettings.load()
+        applyModeSelection(currentSettings.defaultVideoMode)
+        self.selectedStrength = currentSettings.defaultCompressionStrength
+        hasUserCustomizedMode = false
     }
     
     // MARK: - Video Loading & Inspection

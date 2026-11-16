@@ -12,6 +12,7 @@ MediaLiteは、すべてのメディア処理（写真圧縮、動画圧縮、�
 - **完全オンデバイス処理**: 外部サーバーへのアップロード・外部通信はゼロ（0 Network Symbols）。
 - **非破壊ポリシー**: 元ファイルは絶対に上書き・削除せず、PhotoKitを用いて写真ライブラリへ安全に追加保存。
 - **Apple Liquid Glassデザイン**: 派手なグラデーションや過剰な装飾を排し、モノクローム基調＋システムTint、`.ultraThinMaterial`、連続角丸（Continuous Corner Radius）による奥行きと透明感を実現。
+- **完全日本語対応**: システム言語（iOS設定）に連動する日本語UIローカライズ、および設定画面での言語切替に対応。
 - **アクセシビリティ標準準拠**: Dynamic Type、VoiceOver、Reduce Motion、Reduce Transparency、Dark Modeに完全対応。
 
 ---
@@ -26,6 +27,8 @@ MediaLiteは、すべてのメディア処理（写真圧縮、動画圧縮、�
   - `HIGH`: 容量削減優先（JPEG品質 約55%）
 - **メモリ効率**: ImageIOストリーミングダウンサンプリングにより、ピークメモリを30MB以下に抑制。
 - **メタデータ保持**: EXIF、TIFF、GPS座標、Orientation（回転）、色空間、透過アルファチャンネルを完全維持。
+- **安全保持フォールバック**: 圧縮によってファイルサイズが増加する場合は、元ファイルデータを安全に保持・採用してユーザーの不利益を防止。
+- **ExifHelper厳密分離**: 単一JPEGとステレオMPO（Multi-Picture Format）をMagic Bytesおよび画像数で高精度に識別。
 
 ### 2. 動画圧縮・形式変換 (Video Compression & Transcoding)
 - **対応形式**: MOV / MP4 / HEVC (H.265) / H.264 (AVC)
@@ -33,8 +36,9 @@ MediaLiteは、すべてのメディア処理（写真圧縮、動画圧縮、�
   1. **容量縮小**: 解像度とビットレートを最適化してサイズを削減。
   2. **互換性向上**: 幅広い機器で再生可能な標準MP4 (H.264 / AAC) に変換。
   3. **圧縮＋H.264変換**: 容量を削減しながらH.264形式へ再エンコード。
-- **HDR対応**: HDR動画（Rec. 2020）を検出し、適切なSDR（Rec. 709）トーンマッピングを適用。
-- **音声・アスペクト比維持**: AAC音声を確実に保持。無音動画（画面収録など）も安全にハンドリング。
+- **HDR対応**: HDR動画（10-bit HLG/PQ, Rec. 2020）を検出し、適切なSDR（Rec. 709）トーンマッピングを適用。
+- **インターリーブ多重化**: 映像・音声ストリームを協調してAVAssetWriterへ供給し、バッファ滞留やバックプレッシャーによるデッドロックを防止。
+- **音声・アスペクト比維持**: AAC音声を確実に保持。無音動画（画面収録など）や音声のみ動画も安全にハンドリング。
 - **非同期進捗＆キャンセル**: `AsyncStream` によるリアルタイム進捗通知と、キャンセル時の一時ファイル完全自動クリーンアップ。
 
 ### 3. 5画面ナビゲーション (Liquid Glass UI)
@@ -96,9 +100,9 @@ MediaLite/
 
 ---
 
-## 🧪 テスト体制 (全324テストケース)
+## 🧪 テスト体制 (全324テストケース・100% Pass)
 
-リポジトリには合計324件の網羅的テストスイートが含まれています。
+リポジトリには合計324件の網羅的テストスイートが含まれており、全件パス（0 failures）を達成しています。
 
 - **Tier 1 (Feature Coverage)**: 写真圧縮、動画変換、履歴永続化、設定保存、モデル計算。
 - **Tier 2 (Boundary & Corner)**: ゼロバイト・極大ファイル、非同期キャンセル、競合耐性。
@@ -111,18 +115,17 @@ MediaLite/
 
 ## 🏗 ビルド & 実行方法
 
-### 1. macOS / Xcode でのビルド
+### 1. macOS / Xcode でのビルド & テスト
 ```bash
 # プロジェクトを開く
 open MediaLite.xcodeproj
 
-# またはコマンドラインからビルド・テストを実行
-xcodebuild -scheme MediaLite \
-  -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
-  test
+# またはスクリプトで最新シミュレータを自動検出してテストを実行
+DEST=$(python3 scripts/detect_simulator.py)
+xcodebuild -scheme MediaLite -destination "$DEST" test
 ```
 
-### 2. Windows / VSCode 環境での開発
+### 2. Windows / Linux / Codespace 環境での開発
 - Codespace / VSCode Remote Containers 環境で編集可能。
 - `scripts/validate_ci.py` により、CI設定・スキーマの整合性を手元で即座に検証可能。
 ```bash
@@ -131,10 +134,11 @@ python3 scripts/validate_ci.py
 
 ### 3. GitHub Actions CI
 `.github/workflows/ci.yml` が用意されており、プルリクエストやPush時に自動的に以下が実行されます：
-- `macos-14` ランナーでのXcodeビルド
+- `macos-26` ランナー（Xcode 26.6）でのビルド
 - SwiftLint 構文チェック
-- プライバシースキャン（外部通信APIのゼロ検証）
-- ユニットテスト＆E2Eテスト実行
-- テスト結果・ビルド成果物の自動アーカイブ
+- プライバシースキャン（外部通信APIのゼロ検証、Add-Only宣言、マニフェスト）
+- ユニットテスト＆E2Eテスト全324件実行
+- テスト結果（`.xcresult`）の自動アップロード
+- Release Archive（Unsigned Build Packaging）の自動生成とアップロード
 
 Apple Developer証明書およびProvisioning ProfileをGitHub Secretsに登録することで、署名済み成果物（.ipa）の自動生成も可能です。

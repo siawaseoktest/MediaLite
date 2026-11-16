@@ -63,10 +63,11 @@ public struct StatMetricView: View {
                         .accessibilityHidden(true)
                 }
                 
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(DesignSystem.Fonts.subheadline)
                     .foregroundStyle(DesignSystem.Colors.secondaryText)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.65)
                 
                 Spacer(minLength: 0)
                 
@@ -79,8 +80,8 @@ public struct StatMetricView: View {
             Text(value)
                 .font(DesignSystem.Fonts.statNumber)
                 .foregroundStyle(DesignSystem.Colors.primaryText)
-                .minimumScaleFactor(0.8)
                 .lineLimit(1)
+                .minimumScaleFactor(0.65)
             
             // Optional Subtitle
             if let subtitle = subtitle {

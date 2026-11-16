@@ -33,16 +33,16 @@ final class TabNavigationAndAccessibilityTests: XCTestCase {
         XCTAssertEqual(AppTab.home.selectedIconName, "house.fill")
         XCTAssertEqual(AppTab.home.accessibilityIdentifier, "tab_home")
 
-        // Compress
-        XCTAssertEqual(AppTab.compress.title, "Compress")
-        XCTAssertEqual(AppTab.compress.iconName, "arrow.down.circle")
-        XCTAssertEqual(AppTab.compress.selectedIconName, "arrow.down.circle.fill")
+        // Photos (formerly Compress)
+        XCTAssertEqual(AppTab.compress.title, "Photos")
+        XCTAssertEqual(AppTab.compress.iconName, "photo")
+        XCTAssertEqual(AppTab.compress.selectedIconName, "photo.fill")
         XCTAssertEqual(AppTab.compress.accessibilityIdentifier, "tab_compress")
 
-        // Convert
-        XCTAssertEqual(AppTab.convert.title, "Convert")
-        XCTAssertEqual(AppTab.convert.iconName, "arrow.triangle.2.circlepath")
-        XCTAssertEqual(AppTab.convert.selectedIconName, "arrow.triangle.2.circlepath.circle.fill")
+        // Videos (formerly Convert)
+        XCTAssertEqual(AppTab.convert.title, "Videos")
+        XCTAssertEqual(AppTab.convert.iconName, "video")
+        XCTAssertEqual(AppTab.convert.selectedIconName, "video.fill")
         XCTAssertEqual(AppTab.convert.accessibilityIdentifier, "tab_convert")
 
         // History
@@ -211,5 +211,117 @@ final class TabNavigationAndAccessibilityTests: XCTestCase {
             }
         }
         XCTAssertEqual(inspectedFileCount, targetRelativePaths.count, "All UI component source files must be inspected")
+    }
+
+    // MARK: - 6. Feature 32: Japanese Localization & Multi-Language Support
+
+    func testLocalizationStringsFilesExistAndAreParsable() throws {
+        let fileManager = FileManager.default
+        let currentURL = URL(fileURLWithPath: fileManager.currentDirectoryPath)
+
+        var mediaLiteDir: URL?
+        var candidate = currentURL
+        for _ in 0..<5 {
+            let potential = candidate.appendingPathComponent("MediaLite")
+            if fileManager.fileExists(atPath: potential.path) {
+                mediaLiteDir = potential
+                break
+            }
+            candidate = candidate.deletingLastPathComponent()
+        }
+
+        guard let sourceDir = mediaLiteDir else {
+            throw XCTSkip("Production source directory 'MediaLite' not accessible in current sandbox runner environment")
+        }
+
+        let lprojFiles = [
+            "Resources/ja.lproj/Localizable.strings",
+            "Resources/en.lproj/Localizable.strings",
+            "Resources/ja.lproj/InfoPlist.strings",
+            "Resources/en.lproj/InfoPlist.strings"
+        ]
+
+        for relativePath in lprojFiles {
+            let fileURL = sourceDir.appendingPathComponent(relativePath)
+            XCTAssertTrue(fileManager.fileExists(atPath: fileURL.path), "Localization file must exist: \(relativePath)")
+            let content = try String(contentsOf: fileURL, encoding: .utf8)
+            XCTAssertFalse(content.isEmpty, "Localization file must not be empty: \(relativePath)")
+            XCTAssertTrue(content.contains("="), "Localization file must contain key-value mappings: \(relativePath)")
+        }
+    }
+
+    func testJapaneseLocalizationCoversAllCoreUITabKeys() throws {
+        let fileManager = FileManager.default
+        let currentURL = URL(fileURLWithPath: fileManager.currentDirectoryPath)
+
+        var mediaLiteDir: URL?
+        var candidate = currentURL
+        for _ in 0..<5 {
+            let potential = candidate.appendingPathComponent("MediaLite")
+            if fileManager.fileExists(atPath: potential.path) {
+                mediaLiteDir = potential
+                break
+            }
+            candidate = candidate.deletingLastPathComponent()
+        }
+
+        guard let sourceDir = mediaLiteDir else {
+            throw XCTSkip("Production source directory 'MediaLite' not accessible in current sandbox runner environment")
+        }
+
+        let jaStringsURL = sourceDir.appendingPathComponent("Resources/ja.lproj/Localizable.strings")
+        let jaContent = try String(contentsOf: jaStringsURL, encoding: .utf8)
+
+        // Verify Core Tab Titles are localized to Japanese
+        XCTAssertTrue(jaContent.contains("\"Home\" = \"ホーム\";"), "Japanese translation for Home tab required")
+        XCTAssertTrue(jaContent.contains("\"Photos\" = \"写真\";"), "Japanese translation for Photos tab required")
+        XCTAssertTrue(jaContent.contains("\"Videos\" = \"動画\";"), "Japanese translation for Videos tab required")
+        XCTAssertTrue(jaContent.contains("\"Compress\" = \"圧縮\";"), "Japanese translation for Compress required")
+        XCTAssertTrue(jaContent.contains("\"Convert\" = \"変換\";"), "Japanese translation for Convert required")
+        XCTAssertTrue(jaContent.contains("\"History\" = \"履歴\";"), "Japanese translation for History tab required")
+        XCTAssertTrue(jaContent.contains("\"Settings\" = \"設定\";"), "Japanese translation for Settings tab required")
+
+        // Verify Key Action and Hero Strings
+        XCTAssertTrue(jaContent.contains("\"LIFETIME SAVINGS\" = \"合計削減容量\";"))
+        XCTAssertTrue(jaContent.contains("\"Quick Actions\" = \"クイック操作\";"))
+        XCTAssertTrue(jaContent.contains("\"BATCH COMPRESSION COMPLETE\" = \"一括圧縮が完了しました\";"))
+        XCTAssertTrue(jaContent.contains("\"CONVERSION COMPLETE\" = \"変換完了\";"))
+        XCTAssertTrue(jaContent.contains("\"Clear All History\" = \"すべての履歴を消去\";"))
+        XCTAssertTrue(jaContent.contains("\"100% On-Device Processing\" = \"完全オンデバイス処理\";"))
+    }
+
+    func testAppLanguageEnumerationAndDisplayNames() {
+        let languages = AppLanguage.allCases
+        XCTAssertEqual(languages, [.system, .japanese, .english])
+
+        XCTAssertEqual(AppLanguage.system.displayName, "System Default")
+        XCTAssertEqual(AppLanguage.japanese.displayName, "日本語")
+        XCTAssertEqual(AppLanguage.english.displayName, "English")
+    }
+
+    func testInfoPlistJapaneseAddUsageDescription() throws {
+        let fileManager = FileManager.default
+        let currentURL = URL(fileURLWithPath: fileManager.currentDirectoryPath)
+
+        var mediaLiteDir: URL?
+        var candidate = currentURL
+        for _ in 0..<5 {
+            let potential = candidate.appendingPathComponent("MediaLite")
+            if fileManager.fileExists(atPath: potential.path) {
+                mediaLiteDir = potential
+                break
+            }
+            candidate = candidate.deletingLastPathComponent()
+        }
+
+        guard let sourceDir = mediaLiteDir else {
+            throw XCTSkip("Production source directory 'MediaLite' not accessible in current sandbox runner environment")
+        }
+
+        let jaInfoPlistURL = sourceDir.appendingPathComponent("Resources/ja.lproj/InfoPlist.strings")
+        let content = try String(contentsOf: jaInfoPlistURL, encoding: .utf8)
+
+        XCTAssertTrue(content.contains("NSPhotoLibraryAddUsageDescription"), "InfoPlist.strings must localize Photo Library Add-Only permission")
+        XCTAssertTrue(content.contains("写真ライブラリ"), "InfoPlist.strings must contain Japanese explanation")
     }
 }

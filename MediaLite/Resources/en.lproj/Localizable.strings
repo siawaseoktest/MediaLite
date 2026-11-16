@@ -1,0 +1,133 @@
+/* 
+  Localizable.strings (English)
+  MediaLite
+*/
+
+/* --- Navigation & Tabs --- */
+"MediaLite" = "MediaLite";
+"Home" = "Home";
+"Compress" = "Compress";
+"Convert" = "Convert";
+"History" = "History";
+"Settings" = "Settings";
+
+/* --- Home Tab --- */
+"LIFETIME SAVINGS" = "LIFETIME SAVINGS";
+"Photos" = "Photos";
+"Videos" = "Videos";
+"Processed" = "Processed";
+"Quick Actions" = "Quick Actions";
+"Photos & Images" = "Photos & Images";
+"Videos & MP4" = "Videos & MP4";
+"Recent Activity" = "Recent Activity";
+"See All" = "See All";
+"No Media Processed Yet" = "No Media Processed Yet";
+"Compress photos or convert videos to see lifetime savings and processing history here." = "Compress photos or convert videos to see lifetime savings and processing history here.";
+
+/* --- Compress Tab --- */
+"Compression Quality" = "Compression Quality";
+"Quality" = "Quality";
+"Low (High Quality)" = "Low (High Quality)";
+"Medium (Balanced)" = "Medium (Balanced)";
+"High (Maximum Savings)" = "High (Maximum Savings)";
+"Light compression (~90% quality). Preserves maximum detail, ideal for archival or printing." = "Light compression (~90% quality). Preserves maximum detail, ideal for archival or printing.";
+"Balanced compression (~75% quality). Greatly reduces file size with imperceptible quality loss." = "Balanced compression (~75% quality). Greatly reduces file size with imperceptible quality loss.";
+"Maximum compression (~55% quality). Maximizes storage savings, ideal for fast sharing or email." = "Maximum compression (~55% quality). Maximizes storage savings, ideal for fast sharing or email.";
+"Select Photos to Compress" = "Select Photos to Compress";
+"Supports JPEG, HEIC, and PNG.\nSelect multiple photos for batch compression." = "Supports JPEG, HEIC, and PNG.\nSelect multiple photos for batch compression.";
+"Compress %lld Photos" = "Compress %lld Photos";
+"Compress %lld Photo" = "Compress %lld Photo";
+"Selected Photos (%lld)" = "Selected Photos (%lld)";
+"Add More" = "Add More";
+"Clear" = "Clear";
+"Compressing %lld of %lld..." = "Compressing %1$lld of %2$lld...";
+"Cancel" = "Cancel";
+"BATCH COMPRESSION COMPLETE" = "BATCH COMPRESSION COMPLETE";
+"Saved to Photos" = "Saved to Photos";
+"Save All to Photo Library" = "Save All to Photo Library";
+"Done" = "Done";
+"Error" = "Error";
+"OK" = "OK";
+"An unknown error occurred." = "An unknown error occurred.";
+
+/* --- Convert Tab --- */
+"Select Video to Convert" = "Select Video to Convert";
+"Supports MOV, MP4, and HDR videos.\nReduce size or transcode to universal H.264/MP4." = "Supports MOV, MP4, and HDR videos.\nReduce size or transcode to universal H.264/MP4.";
+"Original Size: %@" = "Original Size: %@";
+"Change" = "Change";
+"Duration" = "Duration";
+"Resolution" = "Resolution";
+"HDR" = "HDR";
+"Yes" = "Yes";
+"SDR" = "SDR";
+"Conversion Mode" = "Conversion Mode";
+"Reduce Size" = "Reduce Size";
+"Improve Compatibility (H.264)" = "Improve Compatibility (H.264)";
+"Compress & Convert (H.264)" = "Compress & Convert (H.264)";
+"Compresses video using the original codec to save storage space while maintaining visual quality." = "Compresses video using the original codec to save storage space while maintaining visual quality.";
+"Converts modern formats (HEVC, MOV) to universal H.264 and AAC in an MP4 container for playback on all devices." = "Converts modern formats (HEVC, MOV) to universal H.264 and AAC in an MP4 container for playback on all devices.";
+"Combines aggressive file size reduction with universal H.264 conversion for web and cross-platform sharing." = "Combines aggressive file size reduction with universal H.264 conversion for web and cross-platform sharing.";
+"Compression Strength" = "Compression Strength";
+"Strength" = "Strength";
+"Processing Options" = "Processing Options";
+"Universal MP4" = "Universal MP4";
+"HDR → SDR" = "HDR → SDR";
+"Start Video Conversion" = "Start Video Conversion";
+"Preparing conversion..." = "Preparing conversion...";
+"Cancel Conversion" = "Cancel Conversion";
+"CONVERSION COMPLETE" = "CONVERSION COMPLETE";
+"Save Video to Photo Library" = "Save Video to Photo Library";
+"Convert Another Video" = "Convert Another Video";
+
+/* --- History Tab --- */
+"Clear All History" = "Clear All History";
+"This action permanently removes all compression records from your local history archive. Original and processed media files will not be deleted." = "This action permanently removes all compression records from your local history archive. Original and processed media files will not be deleted.";
+"History Category" = "History Category";
+"All" = "All";
+"%lld items" = "%lld items";
+"%lld item" = "%lld item";
+"%@ saved" = "%@ saved";
+"Delete" = "Delete";
+"No History Found" = "No History Found";
+"No media files have been compressed or converted yet." = "No media files have been compressed or converted yet.";
+"No photos have been processed yet." = "No photos have been processed yet.";
+"No videos have been processed yet." = "No videos have been processed yet.";
+
+/* --- Settings Tab --- */
+"Default Compression Settings" = "Default Compression Settings";
+"Photo Quality" = "Photo Quality";
+"Video Mode" = "Video Mode";
+"Photo & Video Preferences" = "Photo & Video Preferences";
+"Auto-Save to Photo Library" = "Auto-Save to Photo Library";
+"Preserve EXIF & Metadata" = "Preserve EXIF & Metadata";
+"Prompt Before Deleting Original" = "Prompt Before Deleting Original";
+"Temporary Storage & Cache" = "Temporary Storage & Cache";
+"Cache Footprint" = "Cache Footprint";
+"Device Free Storage" = "Device Free Storage";
+"Clear Temporary Cache" = "Clear Temporary Cache";
+"Clear Cache" = "Clear Cache";
+"This removes all sandboxed temporary processing files. Completed exports saved to your Photo Library will remain safe." = "This removes all sandboxed temporary processing files. Completed exports saved to your Photo Library will remain safe.";
+"Reset All Preferences" = "Reset All Preferences";
+"Reset to Factory Defaults" = "Reset to Factory Defaults";
+"All compression and conversion preferences will be restored to their original default settings." = "All compression and conversion preferences will be restored to their original default settings.";
+"Privacy & Security" = "Privacy & Security";
+"100% On-Device Processing" = "100% On-Device Processing";
+"MediaLite operates strictly offline. No photos, videos, or metadata are ever transmitted, tracked, or collected over the network." = "MediaLite operates strictly offline. No photos, videos, or metadata are ever transmitted, tracked, or collected over the network.";
+"Photo Library Add-Only: MediaLite can only export newly compressed items and cannot inspect or delete existing photos." = "Photo Library Add-Only: MediaLite can only export newly compressed items and cannot inspect or delete existing photos.";
+"Reset All Preferences to Defaults" = "Reset All Preferences to Defaults";
+"Language" = "Language";
+"System Default" = "System Default";
+"Japanese" = "Japanese";
+"English" = "English";
+
+/* --- Formatter & Savings Badge --- */
+"No size change" = "No size change";
+"Saved %@ (-%@%%)" = "Saved %@ (-%@%%)";
+"Increased by %@ (+%@%%)" = "Increased by %@ (+%@%%)";
+"No change in file size" = "No change in file size";
+"%@ percent reduction in file size" = "%@ percent reduction in file size";
+"Saved %@, %@ percent reduction in file size" = "Saved %@, %@ percent reduction in file size";
+"%@ percent increase in file size" = "%@ percent increase in file size";
+"File size increased by %@, %@ percent increase" = "File size increased by %@, %@ percent increase";
+"Total Space Saved" = "Total Space Saved";
+"Photos Compressed" = "Photos Compressed";

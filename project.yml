@@ -7,6 +7,11 @@ options:
   xcodeVersion: "15.0"
   groupSortPosition: top
   generateEmptyDirectories: true
+  developmentLanguage: en
+  knownRegions:
+    - en
+    - ja
+    - Base
 
 settings:
   base:
