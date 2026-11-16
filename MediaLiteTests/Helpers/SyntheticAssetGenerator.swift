@@ -528,20 +528,25 @@ public enum SyntheticAssetGenerator {
         }
         writer.startSession(atSourceTime: .zero)
 
-        // 1. Write Video Frames & Audio Buffers concurrently in a natural, backpressure-driven feed loop
+        // 1. Write Video Frames & Audio Buffers concurrently in an interleaved, timestamp-aligned feed loop
         let totalFrames = max(1, Int(ceil(durationSeconds * Double(fps))))
         var videoFramesWritten = 0
         var lastProgressDate = Date()
         var videoFinished = false
         var audioFinished = (audioInput == nil)
+        let interleaveToleranceSeconds = 0.10
 
         while !videoFinished || !audioFinished {
             var wroteData = false
 
-            // A. Video Feed: feed next frame if ready
+            let currentVideoTime = videoFinished ? Double.infinity : Double(videoFramesWritten) / Double(fps)
+            let currentAudioTime = audioFinished ? Double.infinity : Double(audioSamplesWritten) / sampleRate
+
+            // A. Video Feed: feed next frame if video is ready and not running excessively ahead of audio
             if !videoFinished {
                 if videoFramesWritten < totalFrames {
-                    if videoInput.isReadyForMoreMediaData {
+                    let canWriteVideo = audioFinished || (currentVideoTime <= currentAudioTime + interleaveToleranceSeconds)
+                    if canWriteVideo && videoInput.isReadyForMoreMediaData {
                         let pts = CMTime(value: CMTimeValue(videoFramesWritten), timescale: fps)
                         if let pixelBuffer = makePixelBuffer(
                             width: videoWidth,
@@ -550,7 +555,10 @@ public enum SyntheticAssetGenerator {
                             totalFrames: totalFrames,
                             isHDR: isHDR
                         ) {
-                            adaptor.append(pixelBuffer, withPresentationTime: pts)
+                            let appended = adaptor.append(pixelBuffer, withPresentationTime: pts)
+                            if !appended && writer.status == .failed {
+                                throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "adaptor.append failed")
+                            }
                         }
                         videoFramesWritten += 1
                         wroteData = true
@@ -562,10 +570,11 @@ public enum SyntheticAssetGenerator {
                 }
             }
 
-            // B. Audio Feed: feed next buffer if ready
+            // B. Audio Feed: feed next buffer if audio is ready and not running excessively ahead of video
             if !audioFinished, let aInput = audioInput {
                 if audioSamplesWritten < totalAudioSamples {
-                    if aInput.isReadyForMoreMediaData {
+                    let canWriteAudio = videoFinished || (currentAudioTime <= currentVideoTime + interleaveToleranceSeconds)
+                    if canWriteAudio && aInput.isReadyForMoreMediaData {
                         let framesToGenerate = min(samplesPerBuffer, CMItemCount(totalAudioSamples - audioSamplesWritten))
                         let pts = CMTime(value: CMTimeValue(audioSamplesWritten), timescale: CMTimeScale(sampleRate))
                         if let sampleBuffer = makeAudioSampleBuffer(
@@ -574,7 +583,10 @@ public enum SyntheticAssetGenerator {
                             frames: framesToGenerate,
                             presentationTimeStamp: pts
                         ) {
-                            aInput.append(sampleBuffer)
+                            let appended = aInput.append(sampleBuffer)
+                            if !appended && writer.status == .failed {
+                                throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "audioInput.append failed")
+                            }
                         }
                         audioSamplesWritten += Int(framesToGenerate)
                         wroteData = true
@@ -593,7 +605,7 @@ public enum SyntheticAssetGenerator {
             if wroteData {
                 lastProgressDate = Date()
             } else if !videoFinished || !audioFinished {
-                if Date().timeIntervalSince(lastProgressDate) > 15.0 {
+                if Date().timeIntervalSince(lastProgressDate) > 30.0 {
                     throw SyntheticAssetError.writerFailed("Timed out waiting for video/audio input readiness")
                 }
                 try await Task.sleep(nanoseconds: 2_000_000)
