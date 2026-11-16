@@ -531,8 +531,6 @@ public enum SyntheticAssetGenerator {
         // 1. Write Video Frames & Audio Buffers concurrently in an interleaved, balanced feed loop
         let totalFrames = max(1, Int(ceil(durationSeconds * Double(fps))))
         var videoFramesWritten = 0
-        var audioSamplesWritten = 0
-        let samplesPerBuffer: CMItemCount = 1024
         let overallWaitStart = Date()
 
         while videoFramesWritten < totalFrames || (hasAudio && audioSamplesWritten < totalAudioSamples) {
