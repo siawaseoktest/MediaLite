@@ -84,7 +84,7 @@ public struct HomeView: View {
             Divider()
                 .opacity(0.3)
             
-            // 3-Metric Summary Grid
+            // 2-Metric Summary Grid
             HStack(spacing: 12) {
                 StatMetricView(
                     title: "Photos",
@@ -97,13 +97,6 @@ public struct HomeView: View {
                     title: "Videos",
                     value: "\(viewModel.stats.videoCount)",
                     systemImage: "video.fill",
-                    tintColor: DesignSystem.Colors.accent
-                )
-                
-                StatMetricView(
-                    title: "Processed",
-                    value: Formatters.formatBytes(viewModel.stats.totalOriginalBytes),
-                    systemImage: "arrow.triangle.2.circlepath",
                     tintColor: DesignSystem.Colors.accent
                 )
             }

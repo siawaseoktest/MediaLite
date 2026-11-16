@@ -297,7 +297,7 @@ public struct CompressView: View {
                 
                 Divider().opacity(0.3)
                 
-                Text(Formatters.formatSavingsSummary(
+                Text(Formatters.formatTotalSavingsSummary(
                     originalSize: viewModel.totalOriginalSize,
                     compressedSize: viewModel.totalCompressedSize
                 ))
@@ -307,6 +307,11 @@ public struct CompressView: View {
             .padding(DesignSystem.Metrics.cardPadding)
             .liquidGlassCard()
             .accessibilityIdentifier("compression_results_card")
+            
+            // Individual Results List
+            if !viewModel.compressionResults.isEmpty {
+                individualResultsSection
+            }
             
             // Action Buttons
             VStack(spacing: 12) {
@@ -337,5 +342,87 @@ public struct CompressView: View {
                 .accessibilityIdentifier("button_done_compression")
             }
         }
+    }
+    
+    // MARK: - Individual Results List Section
+    
+    private var individualResultsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(LocalizedStringKey("Individual Results"))
+                .font(DesignSystem.Fonts.headline)
+                .foregroundStyle(DesignSystem.Colors.primaryText)
+            
+            VStack(spacing: 8) {
+                ForEach(Array(viewModel.compressionResults.enumerated()), id: \.offset) { index, result in
+                    let item = index < viewModel.selectedItems.count ? viewModel.selectedItems[index] : nil
+                    individualResultRow(for: result, item: item, index: index)
+                }
+            }
+        }
+        .accessibilityIdentifier("compression_individual_results_section")
+    }
+    
+    private func individualResultRow(for result: PhotoCompressionResult, item: MediaItem?, index: Int) -> some View {
+        let fileName = item?.suggestedFileName ?? result.originalURL.lastPathComponent
+        
+        return HStack(spacing: 12) {
+            // Thumbnail
+            individualThumbnailView(for: result, item: item)
+            
+            // File Name & Sizes
+            VStack(alignment: .leading, spacing: 3) {
+                Text(fileName)
+                    .font(DesignSystem.Fonts.headline)
+                    .foregroundStyle(DesignSystem.Colors.primaryText)
+                    .lineLimit(1)
+                
+                Text("\(Formatters.formatBytes(result.originalSize)) → \(Formatters.formatBytes(result.compressedSize))")
+                    .font(DesignSystem.Fonts.caption)
+                    .foregroundStyle(DesignSystem.Colors.secondaryText)
+                    .lineLimit(1)
+            }
+            
+            Spacer()
+            
+            // Savings Badge
+            SavingsBadge(
+                reductionPercentage: result.reductionPercentage,
+                isSizeIncreased: result.isSizeIncreased,
+                style: .compact
+            )
+        }
+        .padding(DesignSystem.Metrics.paddingMedium)
+        .liquidGlassCard(cornerRadius: DesignSystem.Metrics.buttonCornerRadius)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("compression_result_row_\(index)")
+    }
+    
+    @ViewBuilder
+    private func individualThumbnailView(for result: PhotoCompressionResult, item: MediaItem?) -> some View {
+        Group {
+            if let thumbnailData = item?.thumbnailData, let uiImage = UIImage(data: thumbnailData) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+            } else if let uiImage = UIImage(contentsOfFile: result.compressedURL.path) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+            } else if let uiImage = UIImage(contentsOfFile: result.originalURL.path) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Image(systemName: "photo.fill")
+                    .font(.title3)
+                    .foregroundStyle(DesignSystem.Colors.accent)
+            }
+        }
+        .frame(width: 40, height: 40)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .background(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(DesignSystem.Colors.accent.opacity(0.12))
+        )
     }
 }

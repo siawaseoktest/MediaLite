@@ -215,6 +215,17 @@ final class CompressionRatioCalculatorTests: XCTestCase {
         XCTAssertEqual(equal, "No size change")
     }
     
+    func testTotalSavingsSummaryFormatting() {
+        let saved = Formatters.formatTotalSavingsSummary(originalSize: 10_000_000, compressedSize: 6_000_000)
+        XCTAssertTrue(saved.contains("合計") && saved.contains("削減") && saved.contains("40.0%"))
+        
+        let increased = Formatters.formatTotalSavingsSummary(originalSize: 5_000_000, compressedSize: 6_000_000)
+        XCTAssertTrue(increased.contains("合計") && increased.contains("増加") && increased.contains("+20.0%"))
+        
+        let equal = Formatters.formatTotalSavingsSummary(originalSize: 1_000, compressedSize: 1_000)
+        XCTAssertEqual(equal, "サイズ変更なし")
+    }
+    
     func testByteFormatting() {
         XCTAssertFalse(Formatters.formatBytes(1_048_576).isEmpty)
         XCTAssertFalse(Formatters.formatBytes(0).isEmpty)

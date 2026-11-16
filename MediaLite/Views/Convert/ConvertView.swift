@@ -156,25 +156,29 @@ public struct ConvertView: View {
             Divider().opacity(0.3)
             
             if let meta = viewModel.videoMetadata {
-                HStack(spacing: 12) {
-                    StatMetricView(
-                        title: "Duration",
-                        value: Formatters.formatDuration(meta.duration),
-                        systemImage: "clock.fill",
-                        tintColor: DesignSystem.Colors.accent
-                    )
+                VStack(spacing: 12) {
+                    // Top Row: Duration & Color/HDR (2 columns)
+                    HStack(spacing: 12) {
+                        StatMetricView(
+                            title: "Duration",
+                            value: Formatters.formatDuration(meta.duration),
+                            systemImage: "clock.fill",
+                            tintColor: DesignSystem.Colors.accent
+                        )
+                        
+                        StatMetricView(
+                            title: "Color / HDR",
+                            value: meta.isHDR ? "HDR" : "SDR",
+                            systemImage: meta.isHDR ? "sun.max.fill" : "sun.min.fill",
+                            tintColor: DesignSystem.Colors.accent
+                        )
+                    }
                     
+                    // Bottom Row: Full-width Resolution (1 column)
                     StatMetricView(
                         title: "Resolution",
-                        value: "\(Int(meta.naturalSize.width))×\(Int(meta.naturalSize.height))",
+                        value: "\(Int(meta.naturalSize.width)) × \(Int(meta.naturalSize.height))",
                         systemImage: "tv.fill",
-                        tintColor: DesignSystem.Colors.accent
-                    )
-                    
-                    StatMetricView(
-                        title: "HDR",
-                        value: meta.isHDR ? "Yes" : "SDR",
-                        systemImage: meta.isHDR ? "sun.max.fill" : "sun.min.fill",
                         tintColor: DesignSystem.Colors.accent
                     )
                 }
@@ -189,23 +193,30 @@ public struct ConvertView: View {
     
     private var modeSelectorSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
+            HStack(spacing: 8) {
                 Text("Video Mode")
                     .font(DesignSystem.Fonts.headline)
                     .foregroundStyle(DesignSystem.Colors.primaryText)
+                    .lineLimit(1)
+                    .layoutPriority(0)
                 
-                Spacer()
+                Spacer(minLength: 4)
                 
                 Picker("Video Mode", selection: Binding(
                     get: { viewModel.selectedMode },
                     set: { viewModel.applyModeSelection($0) }
                 )) {
                     ForEach(VideoProcessingMode.allCases, id: \.self) { mode in
-                        Text(LocalizedStringKey(mode.title)).tag(mode)
+                        Text(LocalizedStringKey(mode.title))
+                            .lineLimit(1)
+                            .tag(mode)
                     }
                 }
                 .pickerStyle(.menu)
                 .tint(DesignSystem.Colors.accent)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+                .layoutPriority(1)
                 .accessibilityIdentifier("picker_video_mode")
             }
             

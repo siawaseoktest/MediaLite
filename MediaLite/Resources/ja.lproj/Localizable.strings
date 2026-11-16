@@ -43,6 +43,7 @@
 "Compressing %lld of %lld..." = "%2$lld枚中%1$lld枚を圧縮中...";
 "Cancel" = "キャンセル";
 "BATCH COMPRESSION COMPLETE" = "一括圧縮が完了しました";
+"Individual Results" = "個別結果";
 "Saved to Photos" = "写真に保存済み";
 "Save All to Photo Library" = "すべて写真ライブラリに保存";
 "Done" = "完了";
@@ -56,6 +57,7 @@
 "Original Size: %@" = "元サイズ: %@";
 "Change" = "変更";
 "Duration" = "再生時間";
+"Color / HDR" = "色域 / HDR";
 "Resolution" = "解像度";
 "HDR" = "HDR";
 "Yes" = "対応";

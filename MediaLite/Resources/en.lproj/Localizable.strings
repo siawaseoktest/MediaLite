@@ -43,6 +43,7 @@
 "Compressing %lld of %lld..." = "Compressing %1$lld of %2$lld...";
 "Cancel" = "Cancel";
 "BATCH COMPRESSION COMPLETE" = "BATCH COMPRESSION COMPLETE";
+"Individual Results" = "Individual Results";
 "Saved to Photos" = "Saved to Photos";
 "Save All to Photo Library" = "Save All to Photo Library";
 "Done" = "Done";
@@ -56,6 +57,7 @@
 "Original Size: %@" = "Original Size: %@";
 "Change" = "Change";
 "Duration" = "Duration";
+"Color / HDR" = "Color / HDR";
 "Resolution" = "Resolution";
 "HDR" = "HDR";
 "Yes" = "Yes";

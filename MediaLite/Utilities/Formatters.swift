@@ -116,6 +116,22 @@ public enum Formatters {
         }
     }
     
+    /// Formats total batch savings summary in Japanese (e.g. "合計 43 KB 削減 (-0.7%)").
+    public static func formatTotalSavingsSummary(originalSize: Int64, compressedSize: Int64) -> String {
+        let delta = originalSize - compressedSize
+        if delta > 0 {
+            let savedBytes = formatBytes(delta)
+            let percentage = (Double(delta) / Double(max(1, originalSize))) * 100.0
+            return "合計 \(savedBytes) 削減 (-\(String(format: "%.1f", percentage))%)"
+        } else if delta < 0 {
+            let increasedBytes = formatBytes(abs(delta))
+            let percentage = (Double(abs(delta)) / Double(max(1, originalSize))) * 100.0
+            return "合計 \(increasedBytes) 増加 (+\(String(format: "%.1f", percentage))%)"
+        } else {
+            return "サイズ変更なし"
+        }
+    }
+    
     // MARK: - Date Formatting
     
     private static let relativeDateFormatter: RelativeDateTimeFormatter = {
