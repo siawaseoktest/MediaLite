@@ -148,7 +148,7 @@ public struct AppSettings: Codable, Equatable, Sendable {
 
 // MARK: - PresetManagerProtocol
 
-public protocol PresetManagerProtocol: Sendable {
+public protocol PresetManagerProtocol {
     func loadSettings() -> AppSettings
     func saveSettings(_ settings: AppSettings)
     func resetSettings() -> AppSettings

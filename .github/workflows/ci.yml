@@ -23,7 +23,7 @@ permissions:
 jobs:
   build-and-test:
     name: Build, Test & Package
-    runs-on: macos-14
+    runs-on: macos-26
     timeout-minutes: 30
 
     steps:
@@ -34,17 +34,50 @@ jobs:
 
       - name: Select Xcode Version
         run: |
-          echo "Selecting Xcode version..."
-          if [ -d "/Applications/Xcode_15.4.app" ]; then
-            sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
-          elif [ -d "/Applications/Xcode_16.2.app" ]; then
-            sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
-          elif [ -d "/Applications/Xcode_16.1.app" ]; then
-            sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
-          elif [ -d "/Applications/Xcode.app" ]; then
-            sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          echo "Inspecting installed Xcode installations in /Applications..."
+          ls -ld /Applications/Xcode*.app 2>/dev/null || true
+
+          SELECTED_DEVELOPER_DIR=""
+
+          # 1. Prioritize Xcode 26.6 if present
+          if [ -d "/Applications/Xcode_26.6.app" ]; then
+            SELECTED_DEVELOPER_DIR="/Applications/Xcode_26.6.app/Contents/Developer"
+          elif [ -d "/Applications/Xcode-26.6.app" ]; then
+            SELECTED_DEVELOPER_DIR="/Applications/Xcode-26.6.app/Contents/Developer"
+          else
+            # 2. Detect available stable Xcode 26 (exclude beta/preview)
+            for app in /Applications/Xcode_26*.app /Applications/Xcode-26*.app; do
+              if [ -d "$app" ]; then
+                case "$app" in
+                  *[bB]eta*|*[pP]review*)
+                    echo "Skipping preview/beta Xcode: $app"
+                    ;;
+                  *)
+                    SELECTED_DEVELOPER_DIR="$app/Contents/Developer"
+                    break
+                    ;;
+                esac
+              fi
+            done
+
+            # 3. Fallback to default /Applications/Xcode.app
+            if [ -z "$SELECTED_DEVELOPER_DIR" ] && [ -d "/Applications/Xcode.app" ]; then
+              SELECTED_DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer"
+            fi
           fi
-          echo "Active Xcode: $(xcodebuild -version | head -n 1)"
+
+          if [ -n "$SELECTED_DEVELOPER_DIR" ]; then
+            echo "Selecting Xcode Developer directory: $SELECTED_DEVELOPER_DIR"
+            sudo xcode-select -s "$SELECTED_DEVELOPER_DIR"
+          else
+            echo "No custom Xcode selected; retaining runner default $(xcode-select -p)"
+          fi
+
+          echo "=== Active Xcode Information ==="
+          xcodebuild -version
+
+          echo "=== Available SDKs ==="
+          xcodebuild -showsdks
 
       - name: Setup Apple Certificate and Keychain (Optional)
         env:
@@ -93,17 +126,20 @@ jobs:
 
       - name: Run Tests on iOS Simulator
         run: |
-          # Resolve simulator destination dynamically with iPhone 15 preference
-          DESTINATION="platform=iOS Simulator,name=iPhone 15,OS=latest"
-          if ! xcrun simctl list devices available | grep -q "iPhone 15"; then
-            FALLBACK_DEVICE=$(xcrun simctl list devices available | grep -E "iPhone" | head -n 1 | sed -E "s/.*(iPhone [^(]+).*/\1/" | xargs)
-            if [ -n "$FALLBACK_DEVICE" ]; then
-              echo "iPhone 15 not found, falling back to: $FALLBACK_DEVICE"
-              DESTINATION="platform=iOS Simulator,name=$FALLBACK_DEVICE,OS=latest"
-            else
-              DESTINATION="platform=iOS Simulator,name=Any iOS Simulator Device"
-            fi
+          echo "=== Available iOS Simulators ==="
+          xcrun simctl list devices available
+
+          echo "Resolving available iPhone Simulator UDID via simctl JSON..."
+          SIMULATOR_UDID=$(python3 scripts/detect_simulator.py)
+
+          if [ -z "$SIMULATOR_UDID" ]; then
+            echo "::error::No available iPhone simulator found on this runner! Cannot continue test execution."
+            echo "=== Full Device List for Debugging ==="
+            xcrun simctl list devices
+            exit 1
           fi
+
+          DESTINATION="platform=iOS Simulator,id=$SIMULATOR_UDID"
           echo "Target simulator destination: $DESTINATION"
 
           mkdir -p build/artifacts

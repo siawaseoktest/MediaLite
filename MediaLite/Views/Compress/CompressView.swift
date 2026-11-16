@@ -10,11 +10,12 @@
 import SwiftUI
 import PhotosUI
 
+@MainActor
 public struct CompressView: View {
     @StateObject public var viewModel: CompressViewModel
     
-    public init(viewModel: CompressViewModel = CompressViewModel()) {
-        self._viewModel = StateObject(wrappedValue: viewModel)
+    public init(viewModel: CompressViewModel? = nil) {
+        self._viewModel = StateObject(wrappedValue: viewModel ?? CompressViewModel())
     }
     
     public var body: some View {

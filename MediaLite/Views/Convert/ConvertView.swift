@@ -11,11 +11,12 @@ import SwiftUI
 import PhotosUI
 import AVKit
 
+@MainActor
 public struct ConvertView: View {
     @StateObject public var viewModel: ConvertViewModel
     
-    public init(viewModel: ConvertViewModel = ConvertViewModel()) {
-        self._viewModel = StateObject(wrappedValue: viewModel)
+    public init(viewModel: ConvertViewModel? = nil) {
+        self._viewModel = StateObject(wrappedValue: viewModel ?? ConvertViewModel())
     }
     
     public var body: some View {

@@ -9,11 +9,12 @@
 
 import SwiftUI
 
+@MainActor
 public struct SettingsView: View {
     @StateObject public var viewModel: SettingsViewModel
     
-    public init(viewModel: SettingsViewModel = SettingsViewModel()) {
-        self._viewModel = StateObject(wrappedValue: viewModel)
+    public init(viewModel: SettingsViewModel? = nil) {
+        self._viewModel = StateObject(wrappedValue: viewModel ?? SettingsViewModel())
     }
     
     public var body: some View {

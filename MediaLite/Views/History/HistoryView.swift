@@ -9,11 +9,12 @@
 
 import SwiftUI
 
+@MainActor
 public struct HistoryView: View {
     @StateObject public var viewModel: HistoryViewModel
     
-    public init(viewModel: HistoryViewModel = HistoryViewModel()) {
-        self._viewModel = StateObject(wrappedValue: viewModel)
+    public init(viewModel: HistoryViewModel? = nil) {
+        self._viewModel = StateObject(wrappedValue: viewModel ?? HistoryViewModel())
     }
     
     public var body: some View {

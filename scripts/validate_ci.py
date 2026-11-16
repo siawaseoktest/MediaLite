@@ -72,8 +72,8 @@ def validate_ci_file(file_path):
     if not jobs:
         errors.append("No jobs found in workflow")
     for job_id, job in jobs.items():
-        if job.get("runs-on") != "macos-14":
-            errors.append(f"Job '{job_id}' must run on 'macos-14', got: {job.get('runs-on')}")
+        if job.get("runs-on") != "macos-26":
+            errors.append(f"Job '{job_id}' must run on 'macos-26', got: {job.get('runs-on')}")
         if not job.get("timeout-minutes") or job.get("timeout-minutes") > 60:
             errors.append(f"Job '{job_id}' must have a safe timeout-minutes (<= 60)")
 

@@ -9,17 +9,18 @@
 
 import SwiftUI
 
+@MainActor
 public struct HomeView: View {
     @StateObject public var viewModel: HomeViewModel
     @Binding public var selectedTab: AppTab
     
-    public init(viewModel: HomeViewModel = HomeViewModel(), selectedTab: Binding<AppTab> = .constant(.home)) {
-        self._viewModel = StateObject(wrappedValue: viewModel)
+    public init(viewModel: HomeViewModel? = nil, selectedTab: Binding<AppTab> = .constant(.home)) {
+        self._viewModel = StateObject(wrappedValue: viewModel ?? HomeViewModel())
         self._selectedTab = selectedTab
     }
     
-    public init(viewModel: HomeViewModel = HomeViewModel(), selectedTabInt: Binding<Int>) {
-        self._viewModel = StateObject(wrappedValue: viewModel)
+    public init(viewModel: HomeViewModel? = nil, selectedTabInt: Binding<Int>) {
+        self._viewModel = StateObject(wrappedValue: viewModel ?? HomeViewModel())
         self._selectedTab = Binding(
             get: { AppTab(rawValue: selectedTabInt.wrappedValue) ?? .home },
             set: { selectedTabInt.wrappedValue = $0.rawValue }
