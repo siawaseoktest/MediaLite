@@ -1027,7 +1027,7 @@ final class Tier5_ServicesAdversarialTests: XCTestCase {
             originalURL: URL(fileURLWithPath: "/tmp/a.mp4"),
             processedURL: URL(fileURLWithPath: "/tmp/b.mp4"),
             originalSize: -500,
-            compressedSize: 200,
+            processedSize: 200,
             duration: 0.0
         )
         XCTAssertEqual(videoNeg.reductionPercentage, 0.0)
