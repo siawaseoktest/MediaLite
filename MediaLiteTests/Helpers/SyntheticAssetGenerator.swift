@@ -467,7 +467,7 @@ public enum SyntheticAssetGenerator {
             compressionProps[AVVideoProfileLevelKey] = kVTProfileLevel_HEVC_Main10_AutoLevel
             #endif
             // Realistic iPhone 10-bit HDR video bitrate (~12-16 Mbps for 1080p)
-            compressionProps[AVVideoAverageBitRateKey] = max(14_000_000, videoWidth * videoHeight * 8)
+            compressionProps[AVVideoAverageBitRateKey] = max(16_000_000, videoWidth * videoHeight * 10)
         } else {
             compressionProps[AVVideoProfileLevelKey] = AVVideoProfileLevelH264HighAutoLevel
             compressionProps[AVVideoAverageBitRateKey] = max(1_000_000, videoWidth * videoHeight * 3)
@@ -990,53 +990,94 @@ public enum SyntheticAssetGenerator {
             }
 
             // Realistic HDR natural landscape: distant mountains
-            let horizonY = CGFloat(height) * 0.60
-            context.setFillColor(CGColor(srgbRed: 0.2, green: 0.35, blue: 0.45, alpha: 1.0))
+            let mountainHorizonY = CGFloat(height) * 0.45
+            context.setFillColor(CGColor(srgbRed: 0.22, green: 0.38, blue: 0.48, alpha: 1.0))
             let mountainPath = CGMutablePath()
             mountainPath.move(to: CGPoint(x: 0, y: CGFloat(height)))
-            mountainPath.addLine(to: CGPoint(x: 0, y: horizonY))
-            mountainPath.addLine(to: CGPoint(x: CGFloat(width) * 0.3 - panOffset * 0.5, y: horizonY - CGFloat(height) * 0.25))
-            mountainPath.addLine(to: CGPoint(x: CGFloat(width) * 0.7 - panOffset * 0.5, y: horizonY - CGFloat(height) * 0.15))
-            mountainPath.addLine(to: CGPoint(x: CGFloat(width), y: horizonY - CGFloat(height) * 0.05))
+            mountainPath.addLine(to: CGPoint(x: 0, y: mountainHorizonY + CGFloat(height) * 0.1))
+            mountainPath.addLine(to: CGPoint(x: CGFloat(width) * 0.25 - panOffset * 0.5, y: mountainHorizonY - CGFloat(height) * 0.18))
+            mountainPath.addLine(to: CGPoint(x: CGFloat(width) * 0.65 - panOffset * 0.5, y: mountainHorizonY - CGFloat(height) * 0.10))
+            mountainPath.addLine(to: CGPoint(x: CGFloat(width), y: mountainHorizonY + CGFloat(height) * 0.05))
             mountainPath.addLine(to: CGPoint(x: CGFloat(width), y: CGFloat(height)))
             mountainPath.closeSubpath()
             context.addPath(mountainPath)
             context.fillPath()
 
+            // Mountain ridge lines (spatial details on mountains)
+            let ridgeStep: CGFloat = 20.0
+            let startRidgeX = -(panOffset * 0.5).truncatingRemainder(dividingBy: ridgeStep)
+            for rx in stride(from: startRidgeX, to: CGFloat(width) + ridgeStep, by: ridgeStep) {
+                let wx = rx + panOffset * 0.5
+                let rh = 40.0 + 20.0 * sin(Double(wx) * 0.04)
+                context.setStrokeColor(CGColor(srgbRed: 0.18, green: 0.32, blue: 0.42, alpha: 0.6))
+                context.setLineWidth(2.0)
+                context.strokeLineSegments(between: [
+                    CGPoint(x: rx, y: mountainHorizonY + CGFloat(height) * 0.08),
+                    CGPoint(x: rx, y: mountainHorizonY - CGFloat(rh) * CGFloat(height) / 300.0)
+                ])
+            }
+
+            // Midground rolling hills and forest base
+            let midHorizonY = CGFloat(height) * 0.58
+            context.setFillColor(CGColor(srgbRed: 0.14, green: 0.30, blue: 0.18, alpha: 1.0))
+            let midPath = CGMutablePath()
+            midPath.move(to: CGPoint(x: 0, y: CGFloat(height)))
+            midPath.addLine(to: CGPoint(x: 0, y: midHorizonY))
+            midPath.addLine(to: CGPoint(x: CGFloat(width) * 0.4 - panOffset * 0.75, y: midHorizonY - CGFloat(height) * 0.08))
+            midPath.addLine(to: CGPoint(x: CGFloat(width), y: midHorizonY + CGFloat(height) * 0.02))
+            midPath.addLine(to: CGPoint(x: CGFloat(width), y: CGFloat(height)))
+            midPath.closeSubpath()
+            context.addPath(midPath)
+            context.fillPath()
+
+            // Dense midground forest canopy texture
+            let midTreeStep: CGFloat = 10.0
+            let startMidX = -(panOffset * 0.75).truncatingRemainder(dividingBy: midTreeStep)
+            for x in stride(from: startMidX, to: CGFloat(width) + midTreeStep, by: midTreeStep) {
+                let wx = x + panOffset * 0.75
+                let th = 30.0 + 15.0 * sin(Double(wx) * 0.06)
+                context.setFillColor(CGColor(srgbRed: 0.10, green: 0.25, blue: 0.14, alpha: 0.85))
+                context.fill(CGRect(
+                    x: x,
+                    y: midHorizonY - CGFloat(th) * CGFloat(height) / 300.0,
+                    width: max(2.0, midTreeStep * 0.7),
+                    height: CGFloat(th) * CGFloat(height) / 300.0
+                ))
+            }
+
             // Foreground hills and landscape terrain
-            let fgHorizonY = CGFloat(height) * 0.68
-            context.setFillColor(CGColor(srgbRed: 0.12, green: 0.28, blue: 0.18, alpha: 1.0))
+            let fgHorizonY = CGFloat(height) * 0.70
+            context.setFillColor(CGColor(srgbRed: 0.10, green: 0.22, blue: 0.12, alpha: 1.0))
             let fgPath = CGMutablePath()
             fgPath.move(to: CGPoint(x: 0, y: CGFloat(height)))
             fgPath.addLine(to: CGPoint(x: 0, y: fgHorizonY))
-            fgPath.addLine(to: CGPoint(x: CGFloat(width) * 0.5 - panOffset, y: fgHorizonY - CGFloat(height) * 0.12))
+            fgPath.addLine(to: CGPoint(x: CGFloat(width) * 0.5 - panOffset, y: fgHorizonY - CGFloat(height) * 0.06))
             fgPath.addLine(to: CGPoint(x: CGFloat(width), y: fgHorizonY + CGFloat(height) * 0.02))
             fgPath.addLine(to: CGPoint(x: CGFloat(width), y: CGFloat(height)))
             fgPath.closeSubpath()
             context.addPath(fgPath)
             context.fillPath()
 
-            // Rich authentic natural landscape spatial details (dense trees, terrain ridges, field textures)
-            // Statically anchored to panOffset so motion vectors are purely translational (no flicker)
-            let detailSpacing: CGFloat = 12.0
-            let startX = -panOffset.truncatingRemainder(dividingBy: detailSpacing)
-            for x in stride(from: startX, to: CGFloat(width) + detailSpacing, by: detailSpacing) {
-                let worldX = x + panOffset
-                let treeHeight = 25.0 + 15.0 * sin(Double(worldX) * 0.05)
-                context.setFillColor(CGColor(srgbRed: 0.08, green: 0.24, blue: 0.14, alpha: 0.9))
+            // Dense foreground trees and field textures across entire lower terrain
+            let fgTreeStep: CGFloat = 8.0
+            let startFgX = -panOffset.truncatingRemainder(dividingBy: fgTreeStep)
+            for x in stride(from: startFgX, to: CGFloat(width) + fgTreeStep, by: fgTreeStep) {
+                let wx = x + panOffset
+                let th = 40.0 + 20.0 * sin(Double(wx) * 0.05)
+                context.setFillColor(CGColor(srgbRed: 0.06, green: 0.18, blue: 0.08, alpha: 0.95))
                 context.fill(CGRect(
                     x: x,
-                    y: CGFloat(height) - CGFloat(treeHeight) * CGFloat(height) / 200.0,
-                    width: max(2.0, detailSpacing * 0.6),
-                    height: CGFloat(treeHeight) * CGFloat(height) / 200.0
+                    y: CGFloat(height) - CGFloat(th) * CGFloat(height) / 180.0,
+                    width: max(2.0, fgTreeStep * 0.7),
+                    height: CGFloat(th) * CGFloat(height) / 180.0
                 ))
             }
 
-            // Terraced field horizontal contour bands on terrain for natural entropy
-            let contourStep: CGFloat = 14.0
+            // Terraced field contour lines covering foreground terrain
+            let contourStep: CGFloat = 12.0
             for y in stride(from: fgHorizonY, to: CGFloat(height), by: contourStep) {
-                let alpha = 0.20 + 0.10 * sin(Double(y) * 0.08)
-                context.setStrokeColor(CGColor(srgbRed: 0.18, green: 0.35, blue: 0.22, alpha: alpha))
+                let alpha = 0.25 + 0.10 * sin(Double(y) * 0.08)
+                context.setStrokeColor(CGColor(srgbRed: 0.16, green: 0.32, blue: 0.18, alpha: alpha))
                 context.setLineWidth(2.0)
                 context.strokeLineSegments(between: [
                     CGPoint(x: 0, y: y),
