@@ -404,24 +404,19 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
         let bitrateFactor: Double = {
             switch strength {
             case .low: return 0.90
-            case .medium: return 0.70
-            case .high: return 0.50
+            case .medium: return 0.75
+            case .high: return 0.55
             }
         }()
-        let baseBitrate = Int(Double(targetWidth * targetHeight) * 1.5)
-        var targetBitrate = max(250_000, Int(Double(baseBitrate) * bitrateFactor))
+        let baseBitrate = Int(Double(targetWidth * targetHeight) * 1.8)
+        var targetBitrate = max(350_000, Int(Double(baseBitrate) * bitrateFactor))
 
-        // Target audio bitrate: scale down for low-bitrate sources so video track is not starved
-        var targetAudioBitrate = 128_000
+        // Cap target bitrate based on source bitrate if duration > 0 to guarantee compression savings
         if durationSeconds > 0 {
             let sourceBitrate = Double(originalByteSize * 8) / durationSeconds
-            if sourceBitrate > 50_000 {
-                let targetTotalBitrate = sourceBitrate * bitrateFactor * 0.85
-                if hasAudio {
-                    targetAudioBitrate = min(128_000, max(48_000, Int(targetTotalBitrate * 0.18)))
-                }
-                let maxVideoBitrate = max(120_000, Int(targetTotalBitrate - Double(hasAudio ? targetAudioBitrate : 0)))
-                targetBitrate = min(targetBitrate, maxVideoBitrate)
+            if sourceBitrate > 100_000 {
+                let maxAllowedBitrate = max(350_000, Int(sourceBitrate * bitrateFactor))
+                targetBitrate = min(targetBitrate, maxAllowedBitrate)
             }
         }
 
@@ -459,14 +454,14 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
         }
         writer.add(videoInput)
 
-        // Audio compression settings: AAC-LC stereo 44.1kHz (only if source has audio)
+        // Audio compression settings: AAC-LC 128kbps stereo 44.1kHz (only if source has audio)
         var audioInput: AVAssetWriterInput?
         if hasAudio {
             let audioSettings: [String: Any] = [
                 AVFormatIDKey: kAudioFormatMPEG4AAC,
                 AVNumberOfChannelsKey: 2,
                 AVSampleRateKey: 44100.0,
-                AVEncoderBitRateKey: targetAudioBitrate
+                AVEncoderBitRateKey: 128000
             ]
             let aInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioSettings)
             aInput.expectsMediaDataInRealTime = false

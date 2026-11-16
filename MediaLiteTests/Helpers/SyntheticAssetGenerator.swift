@@ -531,7 +531,7 @@ public enum SyntheticAssetGenerator {
         // 1. Write Video Frames & Audio Buffers concurrently in an interleaved, balanced feed loop
         let totalFrames = max(1, Int(ceil(durationSeconds * Double(fps))))
         var videoFramesWritten = 0
-        let overallWaitStart = Date()
+        var lastProgressDate = Date()
 
         while videoFramesWritten < totalFrames || (hasAudio && audioSamplesWritten < totalAudioSamples) {
             var wroteData = false
@@ -580,8 +580,10 @@ public enum SyntheticAssetGenerator {
                 throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "Writer failed")
             }
 
-            if !wroteData {
-                if Date().timeIntervalSince(overallWaitStart) > 20.0 {
+            if wroteData {
+                lastProgressDate = Date()
+            } else {
+                if Date().timeIntervalSince(lastProgressDate) > 15.0 {
                     throw SyntheticAssetError.writerFailed("Timed out waiting for video/audio input readiness")
                 }
                 try await Task.sleep(nanoseconds: 2_000_000)
