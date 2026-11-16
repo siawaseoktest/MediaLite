@@ -325,4 +325,45 @@ final class TabNavigationAndAccessibilityTests: XCTestCase {
         XCTAssertTrue(content.contains("NSPhotoLibraryAddUsageDescription"), "InfoPlist.strings must localize Photo Library Add-Only permission")
         XCTAssertTrue(content.contains("写真ライブラリ"), "InfoPlist.strings must contain Japanese explanation")
     }
+
+    // MARK: - 7. AppIcon Asset Catalog Validation
+
+    func testAppIconAssetCatalogConfigurationAndDimensions() throws {
+        let fileManager = FileManager.default
+        let currentURL = URL(fileURLWithPath: fileManager.currentDirectoryPath)
+
+        var mediaLiteDir: URL?
+        var candidate = currentURL
+        for _ in 0..<5 {
+            let potential = candidate.appendingPathComponent("MediaLite")
+            if fileManager.fileExists(atPath: potential.path) {
+                mediaLiteDir = potential
+                break
+            }
+            candidate = candidate.deletingLastPathComponent()
+        }
+
+        guard let sourceDir = mediaLiteDir else {
+            throw XCTSkip("Production source directory 'MediaLite' not accessible in current sandbox runner environment")
+        }
+
+        let appIconDir = sourceDir.appendingPathComponent("Resources/Assets.xcassets/AppIcon.appiconset")
+        let contentsJSONURL = appIconDir.appendingPathComponent("Contents.json")
+        let appIconPNGURL = appIconDir.appendingPathComponent("AppIcon.png")
+
+        XCTAssertTrue(fileManager.fileExists(atPath: contentsJSONURL.path), "AppIcon Contents.json must exist")
+        XCTAssertTrue(fileManager.fileExists(atPath: appIconPNGURL.path), "AppIcon.png must exist in AppIcon.appiconset")
+
+        let contentsData = try Data(contentsOf: contentsJSONURL)
+        let contentsString = String(decoding: contentsData, as: UTF8.self)
+        XCTAssertTrue(contentsString.contains("\"filename\" : \"AppIcon.png\"") || contentsString.contains("\"filename\":\"AppIcon.png\""))
+        XCTAssertTrue(contentsString.contains("1024x1024"))
+
+        #if canImport(UIKit)
+        if let image = UIImage(contentsOfFile: appIconPNGURL.path) {
+            XCTAssertEqual(image.size.width, 1024)
+            XCTAssertEqual(image.size.height, 1024)
+        }
+        #endif
+    }
 }
