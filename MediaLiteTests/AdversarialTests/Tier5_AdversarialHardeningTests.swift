@@ -145,54 +145,13 @@ final class Tier5_ServicesAdversarialTests: XCTestCase {
     /// Synthesizes an audio-only media asset (M4A container with AAC audio track, zero video tracks).
     private func createAudioOnlyAsset() async throws -> URL {
         let targetURL = trackURL(tempFileManager.createTempFileURL(extension: "m4a"))
-        let writer = try AVAssetWriter(outputURL: targetURL, fileType: .m4a)
-        let audioSettings: [String: Any] = [
-            AVFormatIDKey: kAudioFormatMPEG4AAC,
-            AVNumberOfChannelsKey: 2,
-            AVSampleRateKey: 44100.0,
-            AVEncoderBitRateKey: 128000
-        ]
-        let audioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioSettings)
-        audioInput.expectsMediaDataInRealTime = false
-        guard writer.canAdd(audioInput) else {
-            throw SyntheticAssetError.writerConfigurationFailed("Cannot add audio input")
-        }
-        writer.add(audioInput)
-        guard writer.startWriting() else {
-            throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "startWriting failed")
-        }
-        writer.startSession(atSourceTime: .zero)
-        audioInput.markAsFinished()
-        await withCheckedContinuation { (c: CheckedContinuation<Void, Never>) in
-            writer.finishWriting { c.resume() }
-        }
-        return targetURL
+        return try await SyntheticAssetGenerator.createAudioOnlyVideo(durationSeconds: 0.5, destinationURL: targetURL)
     }
 
-    /// Synthesizes a valid MP4 container with a video track but zero sample buffers (0 duration).
+    /// Synthesizes a valid MP4 container with a video track but zero duration (0.0 seconds).
     private func createZeroDurationAsset() async throws -> URL {
         let targetURL = trackURL(tempFileManager.createTempFileURL(extension: "mp4"))
-        let writer = try AVAssetWriter(outputURL: targetURL, fileType: .mp4)
-        let videoSettings: [String: Any] = [
-            AVVideoCodecKey: AVVideoCodecType.h264,
-            AVVideoWidthKey: 320,
-            AVVideoHeightKey: 240
-        ]
-        let videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
-        videoInput.expectsMediaDataInRealTime = false
-        guard writer.canAdd(videoInput) else {
-            throw SyntheticAssetError.writerConfigurationFailed("Cannot add video input")
-        }
-        writer.add(videoInput)
-        guard writer.startWriting() else {
-            throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "startWriting failed")
-        }
-        writer.startSession(atSourceTime: .zero)
-        videoInput.markAsFinished()
-        await withCheckedContinuation { (c: CheckedContinuation<Void, Never>) in
-            writer.finishWriting { c.resume() }
-        }
-        return targetURL
+        return try await SyntheticAssetGenerator.createZeroDurationVideo(destinationURL: targetURL)
     }
 
     // =========================================================================

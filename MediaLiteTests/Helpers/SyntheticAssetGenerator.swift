@@ -108,13 +108,23 @@ public enum SyntheticAssetGenerator {
         context.setFillColor(color)
         context.fill(CGRect(x: 0, y: 0, width: validWidth, height: validHeight))
 
-        // High-contrast diagonal line to produce non-trivial frequency content for lossy compression
-        context.setStrokeColor(CGColor(srgbRed: 1.0, green: 1.0, blue: 1.0, alpha: 1.0))
-        context.setLineWidth(max(1.0, CGFloat(min(validWidth, validHeight)) * 0.05))
-        context.strokeLineSegments(between: [
-            CGPoint(x: 0, y: 0),
-            CGPoint(x: validWidth, y: validHeight)
-        ])
+        if validWidth > 4 && validHeight > 4 {
+            // High-contrast diagonal lines and grid to produce realistic frequency content for lossy compression
+            context.setStrokeColor(CGColor(srgbRed: 1.0, green: 1.0, blue: 1.0, alpha: 1.0))
+            context.setLineWidth(max(1.0, CGFloat(min(validWidth, validHeight)) * 0.05))
+            context.strokeLineSegments(between: [
+                CGPoint(x: 0, y: 0),
+                CGPoint(x: validWidth, y: validHeight),
+                CGPoint(x: 0, y: validHeight),
+                CGPoint(x: validWidth, y: 0)
+            ])
+            // Subtle geometric texture for natural photo entropy
+            let step = max(8, min(validWidth, validHeight) / 8)
+            for x in stride(from: 0, to: validWidth, by: step) {
+                context.setFillColor(CGColor(srgbRed: 0.8, green: 0.2, blue: 0.5, alpha: 0.4))
+                context.fill(CGRect(x: x, y: 0, width: max(1, step / 2), height: validHeight))
+            }
+        }
 
         guard let image = context.makeImage() else {
             throw SyntheticAssetError.imageCreationFailed
@@ -227,6 +237,19 @@ public enum SyntheticAssetGenerator {
                 width: radius * 2,
                 height: radius * 2
             ))
+
+            // Rich texture pattern to give UI/photographic entropy so downsampling yields measurable byte savings
+            if validWidth > 8 && validHeight > 8 {
+                let step = max(6, min(validWidth, validHeight) / 10)
+                for x in stride(from: 0, to: validWidth, by: step) {
+                    for y in stride(from: 0, to: validHeight, by: step) {
+                        if (x / step + y / step) % 2 == 0 {
+                            context.setFillColor(CGColor(srgbRed: 0.95, green: 0.85, blue: 0.1, alpha: 0.6))
+                            context.fill(CGRect(x: x, y: y, width: step, height: step))
+                        }
+                    }
+                }
+            }
         } else {
             // Opaque emerald background with amber central block
             context.setFillColor(CGColor(srgbRed: 0.15, green: 0.75, blue: 0.35, alpha: 1.0))
@@ -239,6 +262,20 @@ public enum SyntheticAssetGenerator {
                 width: validWidth / 2,
                 height: validHeight / 2
             ))
+
+            // Rich multi-color pattern so downscaled PNGs genuinely reduce byte size
+            if validWidth > 8 && validHeight > 8 {
+                let step = max(4, min(validWidth, validHeight) / 12)
+                for x in stride(from: 0, to: validWidth, by: step) {
+                    for y in stride(from: 0, to: validHeight, by: step) {
+                        let r = CGFloat((x * 7) % 255) / 255.0
+                        let g = CGFloat((y * 11) % 255) / 255.0
+                        let b = CGFloat(((x + y) * 13) % 255) / 255.0
+                        context.setFillColor(CGColor(srgbRed: r, green: g, blue: b, alpha: 1.0))
+                        context.fill(CGRect(x: x, y: y, width: step, height: step))
+                    }
+                }
+            }
         }
 
         guard let image = context.makeImage() else {
@@ -317,6 +354,21 @@ public enum SyntheticAssetGenerator {
             height: max(1, validHeight / 3)
         ))
 
+        // Natural frequency detail so compression yields genuine byte savings
+        if validWidth > 8 && validHeight > 8 {
+            let step = max(6, min(validWidth, validHeight) / 10)
+            for x in stride(from: 0, to: validWidth, by: step) {
+                for y in stride(from: 0, to: validHeight, by: step) {
+                    if (x / step + y / step) % 2 == 1 {
+                        let r = CGFloat((x * 9) % 255) / 255.0
+                        let g = CGFloat((y * 5) % 255) / 255.0
+                        context.setFillColor(CGColor(srgbRed: r, green: g, blue: 0.6, alpha: 0.8))
+                        context.fill(CGRect(x: x, y: y, width: step, height: step))
+                    }
+                }
+            }
+        }
+
         guard let image = context.makeImage() else {
             throw SyntheticAssetError.imageCreationFailed
         }
@@ -345,7 +397,7 @@ public enum SyntheticAssetGenerator {
 
         let properties: [CFString: Any] = [
             kCGImagePropertyOrientation: orientation.rawValue,
-            kCGImageDestinationLossyCompressionQuality: 0.85,
+            kCGImageDestinationLossyCompressionQuality: 0.95,
             kCGImagePropertyExifDictionary: exifDict,
             kCGImagePropertyTIFFDictionary: tiffDict
         ]
@@ -414,6 +466,8 @@ public enum SyntheticAssetGenerator {
             #if canImport(VideoToolbox)
             compressionProps[AVVideoProfileLevelKey] = kVTProfileLevel_HEVC_Main10_AutoLevel
             #endif
+            // Realistic iPhone 10-bit HDR video bitrate (~8-10 Mbps for 1080p)
+            compressionProps[AVVideoAverageBitRateKey] = max(8_000_000, videoWidth * videoHeight * 4)
         } else {
             compressionProps[AVVideoProfileLevelKey] = AVVideoProfileLevelH264HighAutoLevel
             compressionProps[AVVideoAverageBitRateKey] = max(1_000_000, videoWidth * videoHeight * 3)
@@ -449,11 +503,16 @@ public enum SyntheticAssetGenerator {
         )
 
         var audioInput: AVAssetWriterInput?
+        let sampleRate: Double = 44100.0
+        let samplesPerBuffer: CMItemCount = 1024
+        let totalAudioSamples = hasAudio ? Int(durationSeconds * sampleRate) : 0
+        var audioSamplesWritten = 0
+
         if hasAudio {
             let audioSettings: [String: Any] = [
                 AVFormatIDKey: kAudioFormatMPEG4AAC,
                 AVNumberOfChannelsKey: 2,
-                AVSampleRateKey: 44100.0,
+                AVSampleRateKey: sampleRate,
                 AVEncoderBitRateKey: 128000
             ]
             let aInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioSettings)
@@ -469,7 +528,7 @@ public enum SyntheticAssetGenerator {
         }
         writer.startSession(atSourceTime: .zero)
 
-        // 1. Write Video Frames
+        // 1. Write Video Frames & Interleaved Audio Buffers
         let totalFrames = max(1, Int(ceil(durationSeconds * Double(fps))))
         for frameIndex in 0..<totalFrames {
             let videoWaitStart = Date()
@@ -480,7 +539,7 @@ public enum SyntheticAssetGenerator {
                 if writer.status == .failed || writer.status == .cancelled {
                     throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "Writer failed during video feed")
                 }
-                try await Task.sleep(nanoseconds: 5_000_000)
+                try await Task.sleep(nanoseconds: 2_000_000)
             }
 
             let pts = CMTime(value: CMTimeValue(frameIndex), timescale: fps)
@@ -493,41 +552,65 @@ public enum SyntheticAssetGenerator {
             ) {
                 adaptor.append(pixelBuffer, withPresentationTime: pts)
             }
+
+            // Interleave audio writing up to current video frame timestamp to prevent muxer backpressure deadlocks
+            if let aInput = audioInput {
+                let targetAudioSamples = min(totalAudioSamples, Int(Double(frameIndex + 1) / Double(fps) * sampleRate))
+                while audioSamplesWritten < targetAudioSamples {
+                    let audioWaitStart = Date()
+                    while !aInput.isReadyForMoreMediaData {
+                        if Date().timeIntervalSince(audioWaitStart) > 10.0 {
+                            throw SyntheticAssetError.writerFailed("Timed out waiting for audio input readiness")
+                        }
+                        if writer.status == .failed || writer.status == .cancelled {
+                            throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "Writer failed during audio feed")
+                        }
+                        try await Task.sleep(nanoseconds: 2_000_000)
+                    }
+
+                    let framesToGenerate = min(samplesPerBuffer, CMItemCount(targetAudioSamples - audioSamplesWritten))
+                    let audioPts = CMTime(value: CMTimeValue(audioSamplesWritten), timescale: CMTimeScale(sampleRate))
+                    if let sampleBuffer = makeAudioSampleBuffer(
+                        sampleRate: sampleRate,
+                        channels: 2,
+                        frames: framesToGenerate,
+                        presentationTimeStamp: audioPts
+                    ) {
+                        aInput.append(sampleBuffer)
+                    }
+                    audioSamplesWritten += Int(framesToGenerate)
+                }
+            }
         }
         videoInput.markAsFinished()
 
-        // 2. Write Audio Buffers (if enabled)
-        if let audioInput = audioInput {
-            let sampleRate: Double = 44100.0
-            let samplesPerBuffer: CMItemCount = 1024
-            let totalAudioSamples = Int(durationSeconds * sampleRate)
-            var samplesWritten = 0
-
-            while samplesWritten < totalAudioSamples {
+        // 2. Finish any remaining audio samples
+        if let aInput = audioInput {
+            while audioSamplesWritten < totalAudioSamples {
                 let audioWaitStart = Date()
-                while !audioInput.isReadyForMoreMediaData {
+                while !aInput.isReadyForMoreMediaData {
                     if Date().timeIntervalSince(audioWaitStart) > 10.0 {
                         throw SyntheticAssetError.writerFailed("Timed out waiting for audio input readiness")
                     }
                     if writer.status == .failed || writer.status == .cancelled {
                         throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "Writer failed during audio feed")
                     }
-                    try await Task.sleep(nanoseconds: 5_000_000)
+                    try await Task.sleep(nanoseconds: 2_000_000)
                 }
 
-                let framesToGenerate = min(samplesPerBuffer, CMItemCount(totalAudioSamples - samplesWritten))
-                let pts = CMTime(value: CMTimeValue(samplesWritten), timescale: CMTimeScale(sampleRate))
+                let framesToGenerate = min(samplesPerBuffer, CMItemCount(totalAudioSamples - audioSamplesWritten))
+                let audioPts = CMTime(value: CMTimeValue(audioSamplesWritten), timescale: CMTimeScale(sampleRate))
                 if let sampleBuffer = makeAudioSampleBuffer(
                     sampleRate: sampleRate,
                     channels: 2,
                     frames: framesToGenerate,
-                    presentationTimeStamp: pts
+                    presentationTimeStamp: audioPts
                 ) {
-                    audioInput.append(sampleBuffer)
+                    aInput.append(sampleBuffer)
                 }
-                samplesWritten += Int(framesToGenerate)
+                audioSamplesWritten += Int(framesToGenerate)
             }
-            audioInput.markAsFinished()
+            audioInput?.markAsFinished()
         }
 
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
@@ -563,6 +646,142 @@ public enum SyntheticAssetGenerator {
             transform: transform,
             destinationURL: destinationURL
         )
+    }
+
+    // MARK: - Audio-Only and Zero-Duration Assets
+
+    /// Synthesizes a valid audio-only media asset (M4A container with AAC audio track, zero video tracks).
+    @discardableResult
+    public static func createAudioOnlyVideo(
+        durationSeconds: Double = 0.5,
+        destinationURL: URL? = nil
+    ) async throws -> URL {
+        let targetURL = destinationURL ?? FileManager.default.temporaryDirectory
+            .appendingPathComponent("synthetic_audio_\(UUID().uuidString)")
+            .appendingPathExtension("m4a")
+
+        try prepareDestination(at: targetURL)
+
+        let writer = try AVAssetWriter(outputURL: targetURL, fileType: .m4a)
+        let sampleRate: Double = 44100.0
+        let audioSettings: [String: Any] = [
+            AVFormatIDKey: kAudioFormatMPEG4AAC,
+            AVNumberOfChannelsKey: 2,
+            AVSampleRateKey: sampleRate,
+            AVEncoderBitRateKey: 128000
+        ]
+        let audioInput = AVAssetWriterInput(mediaType: .audio, outputSettings: audioSettings)
+        audioInput.expectsMediaDataInRealTime = false
+        guard writer.canAdd(audioInput) else {
+            throw SyntheticAssetError.writerConfigurationFailed("Cannot add audio input")
+        }
+        writer.add(audioInput)
+
+        guard writer.startWriting() else {
+            throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "startWriting failed")
+        }
+        writer.startSession(atSourceTime: .zero)
+
+        let samplesPerBuffer: CMItemCount = 1024
+        let totalSamples = max(samplesPerBuffer, Int(durationSeconds * sampleRate))
+        var samplesWritten = 0
+
+        while samplesWritten < totalSamples {
+            while !audioInput.isReadyForMoreMediaData {
+                try await Task.sleep(nanoseconds: 2_000_000)
+            }
+            let frames = min(samplesPerBuffer, CMItemCount(totalSamples - samplesWritten))
+            let pts = CMTime(value: CMTimeValue(samplesWritten), timescale: CMTimeScale(sampleRate))
+            if let sampleBuffer = makeAudioSampleBuffer(
+                sampleRate: sampleRate,
+                channels: 2,
+                frames: frames,
+                presentationTimeStamp: pts
+            ) {
+                audioInput.append(sampleBuffer)
+            }
+            samplesWritten += Int(frames)
+        }
+        audioInput.markAsFinished()
+
+        await withCheckedContinuation { (c: CheckedContinuation<Void, Never>) in
+            writer.finishWriting { c.resume() }
+        }
+
+        guard writer.status != .failed else {
+            throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "finishWriting failed")
+        }
+
+        return targetURL
+    }
+
+    /// Synthesizes a valid MP4 video container with a video track but zero duration (0.0 seconds).
+    @discardableResult
+    public static func createZeroDurationVideo(
+        destinationURL: URL? = nil
+    ) async throws -> URL {
+        let targetURL = destinationURL ?? FileManager.default.temporaryDirectory
+            .appendingPathComponent("synthetic_zeroduration_\(UUID().uuidString)")
+            .appendingPathExtension("mp4")
+
+        try prepareDestination(at: targetURL)
+
+        let writer = try AVAssetWriter(outputURL: targetURL, fileType: .mp4)
+        let videoSettings: [String: Any] = [
+            AVVideoCodecKey: AVVideoCodecType.h264,
+            AVVideoWidthKey: 320,
+            AVVideoHeightKey: 240
+        ]
+        let videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
+        videoInput.expectsMediaDataInRealTime = false
+        guard writer.canAdd(videoInput) else {
+            throw SyntheticAssetError.writerConfigurationFailed("Cannot add video input")
+        }
+        writer.add(videoInput)
+
+        let adaptor = AVAssetWriterInputPixelBufferAdaptor(
+            assetWriterInput: videoInput,
+            sourcePixelBufferAttributes: [
+                kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32ARGB),
+                kCVPixelBufferWidthKey as String: 320,
+                kCVPixelBufferHeightKey as String: 240,
+                kCVPixelBufferCGImageCompatibilityKey as String: true,
+                kCVPixelBufferCGBitmapContextCompatibilityKey as String: true
+            ]
+        )
+
+        guard writer.startWriting() else {
+            throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "startWriting failed")
+        }
+        writer.startSession(atSourceTime: .zero)
+
+        while !videoInput.isReadyForMoreMediaData {
+            try await Task.sleep(nanoseconds: 2_000_000)
+        }
+
+        if let pixelBuffer = makePixelBuffer(
+            width: 320,
+            height: 240,
+            frameIndex: 0,
+            totalFrames: 1,
+            isHDR: false
+        ) {
+            adaptor.append(pixelBuffer, withPresentationTime: .zero)
+        }
+
+        // End session at .zero so effective movie duration is zero
+        writer.endSession(atSourceEndTime: .zero)
+        videoInput.markAsFinished()
+
+        await withCheckedContinuation { (c: CheckedContinuation<Void, Never>) in
+            writer.finishWriting { c.resume() }
+        }
+
+        guard writer.status != .failed else {
+            throw SyntheticAssetError.writerFailed(writer.error?.localizedDescription ?? "finishWriting failed")
+        }
+
+        return targetURL
     }
 
     // MARK: - 5. Zero-Byte File Generation

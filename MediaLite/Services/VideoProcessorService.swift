@@ -149,17 +149,25 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
         guard FileManager.default.fileExists(atPath: sourceURL.path) else {
             throw VideoProcessingError.fileNotFound(sourceURL)
         }
+        let sourceAttrs = try FileManager.default.attributesOfItem(atPath: sourceURL.path)
+        let originalByteSize = (sourceAttrs[.size] as? NSNumber)?.int64Value ?? 0
+        guard originalByteSize > 0 else {
+            throw VideoProcessingError.zeroByteFile(sourceURL)
+        }
 
         let asset = AVURLAsset(url: sourceURL)
+
+        // 1. Check video tracks first: audio-only containers fail fast with .noVideoTrack
+        let videoTracks = try await asset.loadTracks(withMediaType: .video)
+        guard let videoTrack = videoTracks.first else {
+            throw VideoProcessingError.noVideoTrack(sourceURL)
+        }
+
+        // 2. Check duration on video assets: zero duration videos fail with .zeroDuration
         let durationTime = try await asset.load(.duration)
         let durationSeconds = CMTimeGetSeconds(durationTime)
         guard durationSeconds > 0, !durationSeconds.isNaN else {
             throw VideoProcessingError.zeroDuration(sourceURL)
-        }
-
-        let videoTracks = try await asset.loadTracks(withMediaType: .video)
-        guard let videoTrack = videoTracks.first else {
-            throw VideoProcessingError.noVideoTrack(sourceURL)
         }
 
         let naturalSize = try await videoTrack.load(.naturalSize)
@@ -298,6 +306,19 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
 
         // 3. Load asset and tracks
         let asset = AVURLAsset(url: sourceURL)
+
+        // Check video tracks first: audio-only containers fail fast with .noVideoTrack
+        let videoTracks: [AVAssetTrack]
+        do {
+            videoTracks = try await asset.loadTracks(withMediaType: .video)
+        } catch {
+            throw VideoProcessingError.corruptVideo(error.localizedDescription)
+        }
+        guard let videoTrack = videoTracks.first else {
+            throw VideoProcessingError.noVideoTrack(sourceURL)
+        }
+
+        // Check duration on video assets: zero duration videos fail with .zeroDuration
         let durationTime: CMTime
         do {
             durationTime = try await asset.load(.duration)
@@ -307,16 +328,6 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
         let durationSeconds = CMTimeGetSeconds(durationTime)
         guard durationSeconds > 0, !durationSeconds.isNaN else {
             throw VideoProcessingError.zeroDuration(sourceURL)
-        }
-
-        let videoTracks: [AVAssetTrack]
-        do {
-            videoTracks = try await asset.loadTracks(withMediaType: .video)
-        } catch {
-            throw VideoProcessingError.corruptVideo(error.localizedDescription)
-        }
-        guard let videoTrack = videoTracks.first else {
-            throw VideoProcessingError.noVideoTrack(sourceURL)
         }
 
         let naturalSize = (try? await videoTrack.load(.naturalSize)) ?? .zero
@@ -397,8 +408,17 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
             case .high: return 0.55
             }
         }()
-        let baseBitrate = Int(Double(targetWidth * targetHeight) * 2.2)
-        let targetBitrate = max(350_000, Int(Double(baseBitrate) * bitrateFactor))
+        let baseBitrate = Int(Double(targetWidth * targetHeight) * 1.8)
+        var targetBitrate = max(350_000, Int(Double(baseBitrate) * bitrateFactor))
+
+        // Cap target bitrate based on source bitrate if duration > 0 to guarantee compression savings
+        if durationSeconds > 0 {
+            let sourceBitrate = Double(originalByteSize * 8) / durationSeconds
+            if sourceBitrate > 100_000 {
+                let maxAllowedBitrate = max(350_000, Int(sourceBitrate * bitrateFactor))
+                targetBitrate = min(targetBitrate, maxAllowedBitrate)
+            }
+        }
 
         // 7. Configure AVAssetWriter
         guard let writer = try? AVAssetWriter(outputURL: destinationURL, fileType: outputFileType) else {
@@ -512,11 +532,14 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
             throw VideoProcessingError.corruptVideo(reader.error?.localizedDescription ?? "Reader failed to start")
         }
 
-        // 9. Transfer video samples with cooperative cancellation & progress reporting
-        continuation?.yield(VideoProcessingProgress(fractionCompleted: 0.35, description: "Encoding video stream"))
+        // 9. Transfer video & audio samples in an interleaved fashion to prevent muxer backpressure deadlocks
+        continuation?.yield(VideoProcessingProgress(fractionCompleted: 0.35, description: "Encoding media streams"))
 
-        var lastReportedVideoFraction = 0.35
-        while let sampleBuffer = readerVideoOutput.copyNextSampleBuffer() {
+        var videoFinished = false
+        var audioFinished = (audioInput == nil || readerAudioOutput == nil)
+        var lastReportedFraction = 0.35
+
+        while !videoFinished || !audioFinished {
             if Task.isCancelled {
                 reader.cancelReading()
                 writer.cancelWriting()
@@ -524,70 +547,67 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
                 throw CancellationError()
             }
 
-            while !videoInput.isReadyForMoreMediaData {
-                if Task.isCancelled {
-                    reader.cancelReading()
-                    writer.cancelWriting()
-                    try? FileManager.default.removeItem(at: destinationURL)
-                    throw CancellationError()
+            var madeProgress = false
+
+            // Process video frame if writer input is ready
+            if !videoFinished && videoInput.isReadyForMoreMediaData {
+                if let sampleBuffer = readerVideoOutput.copyNextSampleBuffer() {
+                    videoInput.append(sampleBuffer)
+                    madeProgress = true
+
+                    let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+                    let currentSec = CMTimeGetSeconds(pts)
+                    if currentSec > 0 && durationSeconds > 0 {
+                        let progress = 0.35 + 0.40 * min(1.0, currentSec / durationSeconds)
+                        if progress - lastReportedFraction >= 0.10 {
+                            lastReportedFraction = progress
+                            continuation?.yield(VideoProcessingProgress(fractionCompleted: progress, description: "Encoding video stream"))
+                        }
+                    }
+                } else {
+                    videoInput.markAsFinished()
+                    videoFinished = true
+                    madeProgress = true
                 }
+            }
+
+            // Process audio frame if writer input is ready
+            if !audioFinished, let aInput = audioInput, let rOutput = readerAudioOutput, aInput.isReadyForMoreMediaData {
+                if let audioBuffer = rOutput.copyNextSampleBuffer() {
+                    aInput.append(audioBuffer)
+                    madeProgress = true
+
+                    let pts = CMSampleBufferGetPresentationTimeStamp(audioBuffer)
+                    let currentSec = CMTimeGetSeconds(pts)
+                    if currentSec > 0 && durationSeconds > 0 {
+                        let progress = 0.75 + 0.15 * min(1.0, currentSec / durationSeconds)
+                        if progress - lastReportedFraction >= 0.10 {
+                            lastReportedFraction = progress
+                            continuation?.yield(VideoProcessingProgress(fractionCompleted: progress, description: "Encoding audio stream"))
+                        }
+                    }
+                } else {
+                    aInput.markAsFinished()
+                    audioFinished = true
+                    madeProgress = true
+                }
+            }
+
+            if reader.status == .failed {
+                writer.cancelWriting()
+                try? FileManager.default.removeItem(at: destinationURL)
+                throw VideoProcessingError.corruptVideo(reader.error?.localizedDescription ?? "Reader failed during video processing")
+            }
+
+            if writer.status == .failed || writer.status == .cancelled {
+                writer.cancelWriting()
+                try? FileManager.default.removeItem(at: destinationURL)
+                throw VideoProcessingError.exportFailed(writer.error?.localizedDescription ?? "Writer failed during processing")
+            }
+
+            if !madeProgress {
                 try await Task.sleep(nanoseconds: 2_000_000)
             }
-            videoInput.append(sampleBuffer)
-
-            let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-            let currentSec = CMTimeGetSeconds(pts)
-            if currentSec > 0 && durationSeconds > 0 {
-                let progress = 0.35 + 0.35 * min(1.0, currentSec / durationSeconds)
-                if progress - lastReportedVideoFraction >= 0.10 {
-                    lastReportedVideoFraction = progress
-                    continuation?.yield(VideoProcessingProgress(fractionCompleted: progress, description: "Encoding video stream"))
-                }
-            }
-        }
-        videoInput.markAsFinished()
-
-        // Verify reader did not fail during video read
-        if reader.status == .failed {
-            writer.cancelWriting()
-            try? FileManager.default.removeItem(at: destinationURL)
-            throw VideoProcessingError.corruptVideo(reader.error?.localizedDescription ?? "Reader failed during video processing")
-        }
-
-        // 10. Transfer audio samples (if present)
-        if let readerAudioOutput = readerAudioOutput, let audioInput = audioInput {
-            continuation?.yield(VideoProcessingProgress(fractionCompleted: 0.75, description: "Encoding audio stream"))
-            var lastReportedAudioFraction = 0.75
-            while let audioBuffer = readerAudioOutput.copyNextSampleBuffer() {
-                if Task.isCancelled {
-                    reader.cancelReading()
-                    writer.cancelWriting()
-                    try? FileManager.default.removeItem(at: destinationURL)
-                    throw CancellationError()
-                }
-
-                while !audioInput.isReadyForMoreMediaData {
-                    if Task.isCancelled {
-                        reader.cancelReading()
-                        writer.cancelWriting()
-                        try? FileManager.default.removeItem(at: destinationURL)
-                        throw CancellationError()
-                    }
-                    try await Task.sleep(nanoseconds: 2_000_000)
-                }
-                audioInput.append(audioBuffer)
-
-                let pts = CMSampleBufferGetPresentationTimeStamp(audioBuffer)
-                let currentSec = CMTimeGetSeconds(pts)
-                if currentSec > 0 && durationSeconds > 0 {
-                    let progress = 0.75 + 0.15 * min(1.0, currentSec / durationSeconds)
-                    if progress - lastReportedAudioFraction >= 0.10 {
-                        lastReportedAudioFraction = progress
-                        continuation?.yield(VideoProcessingProgress(fractionCompleted: progress, description: "Encoding audio stream"))
-                    }
-                }
-            }
-            audioInput.markAsFinished()
         }
 
         if Task.isCancelled {

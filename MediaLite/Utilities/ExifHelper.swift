@@ -145,26 +145,17 @@ public enum ExifHelper {
 
     /// Detects the uniform type identifier (UTType) of an image asset from raw `Data`.
     ///
-    /// Uses ImageIO `CGImageSourceGetType` with magic byte fallback (JPEG, PNG, HEIC, TIFF).
+    /// Evaluates magic bytes with ImageIO source inspection, correctly distinguishing between
+    /// standard JPEG and multi-frame MPO (Multi-Picture Object) containers.
     /// - Parameter data: In-memory image data buffer.
     /// - Returns: Detected `UTType`, defaulting to `.jpeg` if format cannot be recognized.
     public static func detectFormat(from data: Data) -> UTType {
-        if let source = CGImageSourceCreateWithData(data as CFData, sourceOptions as CFDictionary),
-           let typeCF = CGImageSourceGetType(source),
-           let utType = UTType(typeCF as String) {
-            return utType
-        }
-
-        // Magic byte fallback
-        // JPEG: 0xFF, 0xD8
-        if data.count >= 2 && data[0] == 0xFF && data[1] == 0xD8 {
-            return .jpeg
-        }
-        // PNG: 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A
+        // 1. PNG: 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A
         if data.count >= 8 && data.starts(with: [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]) {
             return .png
         }
-        // HEIC/HEIF: offset 4 "ftyp" with brand "heic", "heix", "heim", "heis", "mif1", "msf1"
+
+        // 2. HEIC/HEIF: offset 4 "ftyp" with brand "heic", "heix", "heim", "heis", "mif1", "msf1"
         if data.count >= 12 {
             let ftyp = data.subdata(in: 4..<8)
             let brand = data.subdata(in: 8..<12)
@@ -176,12 +167,37 @@ public enum ExifHelper {
                 }
             }
         }
-        // TIFF: Little Endian "II*\0" or Big Endian "MM\0*"
+
+        // 3. TIFF: Little Endian "II*\0" or Big Endian "MM\0*"
         if data.count >= 4 {
             if (data[0] == 0x49 && data[1] == 0x49 && data[2] == 0x2A && data[3] == 0x00) ||
                (data[0] == 0x4D && data[1] == 0x4D && data[2] == 0x00 && data[3] == 0x2A) {
                 return .tiff
             }
+        }
+
+        // 4. JPEG / MPO: 0xFF, 0xD8
+        if data.count >= 2 && data[0] == 0xFF && data[1] == 0xD8 {
+            // Check for genuine multi-frame MPO container (MPF marker with multiple images)
+            if let source = CGImageSourceCreateWithData(data as CFData, sourceOptions as CFDictionary) {
+                let count = CGImageSourceGetCount(source)
+                let typeCF = CGImageSourceGetType(source) as String?
+                let hasMPF = data.range(of: Data([0x4D, 0x50, 0x46, 0x00])) != nil
+                if count > 1 && (typeCF == "public.mpo-image" || hasMPF) {
+                    return UTType("public.mpo-image") ?? .jpeg
+                }
+            }
+            return .jpeg
+        }
+
+        // 5. ImageIO inspection fallback for other image containers
+        if let source = CGImageSourceCreateWithData(data as CFData, sourceOptions as CFDictionary),
+           let typeCF = CGImageSourceGetType(source),
+           let utType = UTType(typeCF as String) {
+            if utType.identifier == "public.mpo-image" && CGImageSourceGetCount(source) <= 1 {
+                return .jpeg
+            }
+            return utType
         }
 
         return .jpeg
@@ -192,9 +208,17 @@ public enum ExifHelper {
     /// - Parameter url: File URL of the image asset.
     /// - Returns: Detected `UTType`, defaulting to `.jpeg` if format cannot be recognized.
     public static func detectFormat(from url: URL) -> UTType {
+        let ext = url.pathExtension.lowercased()
         if let source = CGImageSourceCreateWithURL(url as CFURL, sourceOptions as CFDictionary),
            let typeCF = CGImageSourceGetType(source),
            let utType = UTType(typeCF as String) {
+            if utType.identifier == "public.mpo-image" {
+                if ext == "mpo" || CGImageSourceGetCount(source) > 1 {
+                    return utType
+                } else {
+                    return .jpeg
+                }
+            }
             return utType
         }
         if let detected = UTType(filenameExtension: url.pathExtension) {
@@ -377,7 +401,12 @@ public enum ExifHelper {
         // UTType
         var format: UTType?
         if let typeCF = CGImageSourceGetType(source) {
-            format = UTType(typeCF as String)
+            let utType = UTType(typeCF as String)
+            if utType?.identifier == "public.mpo-image" && count <= 1 {
+                format = .jpeg
+            } else {
+                format = utType
+            }
         }
 
         // Color Space
