@@ -1004,7 +1004,7 @@ public enum SyntheticAssetGenerator {
             context.fillPath()
 
             // Foreground hills and landscape terrain
-            let fgHorizonY = CGFloat(height) * 0.72
+            let fgHorizonY = CGFloat(height) * 0.68
             context.setFillColor(CGColor(srgbRed: 0.12, green: 0.28, blue: 0.18, alpha: 1.0))
             let fgPath = CGMutablePath()
             fgPath.move(to: CGPoint(x: 0, y: CGFloat(height)))
@@ -1016,25 +1016,38 @@ public enum SyntheticAssetGenerator {
             context.addPath(fgPath)
             context.fillPath()
 
-            // Authentic natural landscape spatial details (trees, terrain ridges, field textures)
+            // Rich authentic natural landscape spatial details (dense trees, terrain ridges, field textures)
             // Statically anchored to panOffset so motion vectors are purely translational (no flicker)
-            context.setLineWidth(2.0)
-            let detailSpacing: CGFloat = 16.0
+            let detailSpacing: CGFloat = 12.0
             let startX = -panOffset.truncatingRemainder(dividingBy: detailSpacing)
             for x in stride(from: startX, to: CGFloat(width) + detailSpacing, by: detailSpacing) {
                 let worldX = x + panOffset
-                let ridgeHeight = 15.0 + 10.0 * sin(Double(worldX) * 0.03)
-                context.setStrokeColor(CGColor(srgbRed: 0.08, green: 0.22, blue: 0.12, alpha: 0.8))
+                let treeHeight = 25.0 + 15.0 * sin(Double(worldX) * 0.05)
+                context.setFillColor(CGColor(srgbRed: 0.08, green: 0.24, blue: 0.14, alpha: 0.9))
+                context.fill(CGRect(
+                    x: x,
+                    y: CGFloat(height) - CGFloat(treeHeight) * CGFloat(height) / 200.0,
+                    width: max(2.0, detailSpacing * 0.6),
+                    height: CGFloat(treeHeight) * CGFloat(height) / 200.0
+                ))
+            }
+
+            // Terraced field horizontal contour bands on terrain for natural entropy
+            let contourStep: CGFloat = 14.0
+            for y in stride(from: fgHorizonY, to: CGFloat(height), by: contourStep) {
+                let alpha = 0.20 + 0.10 * sin(Double(y) * 0.08)
+                context.setStrokeColor(CGColor(srgbRed: 0.18, green: 0.35, blue: 0.22, alpha: alpha))
+                context.setLineWidth(2.0)
                 context.strokeLineSegments(between: [
-                    CGPoint(x: x, y: CGFloat(height)),
-                    CGPoint(x: x, y: CGFloat(height) - CGFloat(ridgeHeight) * CGFloat(height) / 300.0)
+                    CGPoint(x: 0, y: y),
+                    CGPoint(x: CGFloat(width), y: y)
                 ])
             }
 
             // Cloud layers in sky with authentic soft gradients, translating smoothly
-            for c in 0..<3 {
-                let cloudX = CGFloat(width) * (0.2 + CGFloat(c) * 0.35) - panOffset * 0.3
-                let cloudY = CGFloat(height) * (0.15 + CGFloat(c) * 0.08)
+            for c in 0..<4 {
+                let cloudX = CGFloat(width) * (0.15 + CGFloat(c) * 0.28) - panOffset * 0.3
+                let cloudY = CGFloat(height) * (0.12 + CGFloat(c) * 0.07)
                 let cloudW = CGFloat(width) * 0.22
                 let cloudH = CGFloat(height) * 0.06
                 context.setFillColor(CGColor(srgbRed: 1.0, green: 0.95, blue: 0.9, alpha: 0.45))

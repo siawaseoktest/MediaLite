@@ -434,12 +434,11 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
             AVVideoTransferFunctionKey: AVVideoTransferFunction_ITU_R_709_2,
             AVVideoYCbCrMatrixKey: AVVideoYCbCrMatrix_ITU_R_709_2,
             AVVideoMaxKeyFrameIntervalKey: 30,
-            AVVideoExpectedSourceFrameRateKey: 30,
-            AVVideoAllowFrameReorderingKey: true
+            AVVideoExpectedSourceFrameRateKey: 30
         ]
 
         if targetCodec == .h264 {
-            compressionProps[AVVideoProfileLevelKey] = AVVideoProfileLevelH264HighAutoLevel
+            compressionProps[AVVideoProfileLevelKey] = AVVideoProfileLevelH264MainAutoLevel
         }
 
         let videoSettings: [String: Any] = [
