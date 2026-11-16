@@ -528,50 +528,60 @@ public enum SyntheticAssetGenerator {
         }
         writer.startSession(atSourceTime: .zero)
 
-        // 1. Write Video Frames & Audio Buffers concurrently in an interleaved, balanced feed loop
+        // 1. Write Video Frames & Audio Buffers concurrently in a natural, backpressure-driven feed loop
         let totalFrames = max(1, Int(ceil(durationSeconds * Double(fps))))
         var videoFramesWritten = 0
         var lastProgressDate = Date()
+        var videoFinished = false
+        var audioFinished = (audioInput == nil)
 
-        while videoFramesWritten < totalFrames || (hasAudio && audioSamplesWritten < totalAudioSamples) {
+        while !videoFinished || !audioFinished {
             var wroteData = false
 
-            // Current timestamps in seconds
-            let currentVideoTime = Double(videoFramesWritten) / Double(fps)
-            let currentAudioTime = hasAudio ? Double(audioSamplesWritten) / sampleRate : currentVideoTime
-
-            // A. Video Feed: feed next frame if ready and video is not too far ahead of audio
-            if videoFramesWritten < totalFrames && (!hasAudio || currentVideoTime <= currentAudioTime + 0.35) {
-                if videoInput.isReadyForMoreMediaData {
-                    let pts = CMTime(value: CMTimeValue(videoFramesWritten), timescale: fps)
-                    if let pixelBuffer = makePixelBuffer(
-                        width: videoWidth,
-                        height: videoHeight,
-                        frameIndex: videoFramesWritten,
-                        totalFrames: totalFrames,
-                        isHDR: isHDR
-                    ) {
-                        adaptor.append(pixelBuffer, withPresentationTime: pts)
+            // A. Video Feed: feed next frame if ready
+            if !videoFinished {
+                if videoFramesWritten < totalFrames {
+                    if videoInput.isReadyForMoreMediaData {
+                        let pts = CMTime(value: CMTimeValue(videoFramesWritten), timescale: fps)
+                        if let pixelBuffer = makePixelBuffer(
+                            width: videoWidth,
+                            height: videoHeight,
+                            frameIndex: videoFramesWritten,
+                            totalFrames: totalFrames,
+                            isHDR: isHDR
+                        ) {
+                            adaptor.append(pixelBuffer, withPresentationTime: pts)
+                        }
+                        videoFramesWritten += 1
+                        wroteData = true
                     }
-                    videoFramesWritten += 1
+                } else {
+                    videoInput.markAsFinished()
+                    videoFinished = true
                     wroteData = true
                 }
             }
 
-            // B. Audio Feed: feed next buffer if ready and audio is not too far ahead of video
-            if let aInput = audioInput, audioSamplesWritten < totalAudioSamples {
-                if currentAudioTime <= currentVideoTime + 0.35 && aInput.isReadyForMoreMediaData {
-                    let framesToGenerate = min(samplesPerBuffer, CMItemCount(totalAudioSamples - audioSamplesWritten))
-                    let pts = CMTime(value: CMTimeValue(audioSamplesWritten), timescale: CMTimeScale(sampleRate))
-                    if let sampleBuffer = makeAudioSampleBuffer(
-                        sampleRate: sampleRate,
-                        channels: 2,
-                        frames: framesToGenerate,
-                        presentationTimeStamp: pts
-                    ) {
-                        aInput.append(sampleBuffer)
+            // B. Audio Feed: feed next buffer if ready
+            if !audioFinished, let aInput = audioInput {
+                if audioSamplesWritten < totalAudioSamples {
+                    if aInput.isReadyForMoreMediaData {
+                        let framesToGenerate = min(samplesPerBuffer, CMItemCount(totalAudioSamples - audioSamplesWritten))
+                        let pts = CMTime(value: CMTimeValue(audioSamplesWritten), timescale: CMTimeScale(sampleRate))
+                        if let sampleBuffer = makeAudioSampleBuffer(
+                            sampleRate: sampleRate,
+                            channels: 2,
+                            frames: framesToGenerate,
+                            presentationTimeStamp: pts
+                        ) {
+                            aInput.append(sampleBuffer)
+                        }
+                        audioSamplesWritten += Int(framesToGenerate)
+                        wroteData = true
                     }
-                    audioSamplesWritten += Int(framesToGenerate)
+                } else {
+                    aInput.markAsFinished()
+                    audioFinished = true
                     wroteData = true
                 }
             }
@@ -589,9 +599,6 @@ public enum SyntheticAssetGenerator {
                 try await Task.sleep(nanoseconds: 2_000_000)
             }
         }
-
-        videoInput.markAsFinished()
-        audioInput?.markAsFinished()
 
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             writer.finishWriting {

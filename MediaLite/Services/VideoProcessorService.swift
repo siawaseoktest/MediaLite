@@ -271,8 +271,10 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
         instruction.timeRange = CMTimeRange(start: .zero, duration: durationTime)
 
         let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: track)
-        // Keep identity on the composition layer so output track preserves preferredTransform on AVAssetWriterInput
-        layerInstruction.setTransform(.identity, at: .zero)
+        // Scale appropriately if renderSize differs from naturalSize while preserving upright orientation
+        let sx = naturalSize.width > 0 ? composition.renderSize.width / naturalSize.width : 1.0
+        let sy = naturalSize.height > 0 ? composition.renderSize.height / naturalSize.height : 1.0
+        layerInstruction.setTransform(CGAffineTransform(scaleX: sx, y: sy), at: .zero)
         instruction.layerInstructions = [layerInstruction]
         composition.instructions = [instruction]
 
@@ -398,9 +400,8 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
 
         // 6. Calculate dimensions and bitrate based on Mode and CompressionStrength
         let dimensionScale: CGFloat = (mode == .compressAndConvert) ? strength.dimensionScale : 1.0
-        // Align to 16-pixel macroblock boundary for optimal H.264/HEVC compression efficiency
-        let targetWidth = max(16, (Int(round(naturalSize.width * dimensionScale)) / 16) * 16)
-        let targetHeight = max(16, (Int(round(naturalSize.height * dimensionScale)) / 16) * 16)
+        let targetWidth = max(2, Int(round(naturalSize.width * dimensionScale)) / 2 * 2)
+        let targetHeight = max(2, Int(round(naturalSize.height * dimensionScale)) / 2 * 2)
 
         let bitrateFactor: Double = {
             switch strength {
@@ -409,14 +410,14 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
             case .high: return 0.55
             }
         }()
-        let baseBitrate = Int(Double(targetWidth * targetHeight) * 1.5)
-        var targetBitrate = max(350_000, Int(Double(baseBitrate) * bitrateFactor))
+        let baseBitrate = Int(Double(targetWidth * targetHeight) * 1.2)
+        var targetBitrate = max(250_000, Int(Double(baseBitrate) * bitrateFactor))
 
         // Cap target bitrate based on source bitrate if duration > 0 to guarantee compression savings
         if durationSeconds > 0 {
             let sourceBitrate = Double(originalByteSize * 8) / durationSeconds
             if sourceBitrate > 100_000 {
-                let maxAllowedBitrate = max(350_000, Int(sourceBitrate * bitrateFactor))
+                let maxAllowedBitrate = max(250_000, Int(sourceBitrate * bitrateFactor))
                 targetBitrate = min(targetBitrate, maxAllowedBitrate)
             }
         }
@@ -493,7 +494,7 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
             let composition = try await Self.buildSDRVideoComposition(
                 for: asset,
                 track: videoTrack,
-                renderSize: naturalSize
+                renderSize: CGSize(width: targetWidth, height: targetHeight)
             )
             let compOutput = AVAssetReaderVideoCompositionOutput(
                 videoTracks: [videoTrack],
