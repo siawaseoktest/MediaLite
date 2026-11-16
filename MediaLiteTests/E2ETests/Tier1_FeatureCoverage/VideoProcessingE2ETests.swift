@@ -257,7 +257,7 @@ final class VideoProcessingE2ETests: XCTestCase {
                 )
                 XCTAssertNotEqual(
                     transfer,
-                    kCVImageBufferTransferFunction_SMPTE_ST_2084 as String,
+                    kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String,
                     "Tone-mapped video must not use PQ transfer function"
                 )
 

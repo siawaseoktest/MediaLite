@@ -80,6 +80,10 @@ public struct ImageMetadata: @unchecked Sendable {
         CGSize(width: pixelWidth, height: pixelHeight)
     }
 
+    public var pixelDimensions: CGSize {
+        CGSize(width: pixelWidth, height: pixelHeight)
+    }
+
     public init(
         pixelWidth: Int,
         pixelHeight: Int,

@@ -394,7 +394,7 @@ public enum SyntheticAssetGenerator {
 
         try prepareDestination(at: targetURL)
 
-        let fileType: AVFileType = (targetURL.pathExtension.lowercased() == "mov") ? .quickTimeMovie : .mp4
+        let fileType: AVFileType = (targetURL.pathExtension.lowercased() == "mov") ? .mov : .mp4
 
         let writer: AVAssetWriter
         do {

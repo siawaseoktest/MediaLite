@@ -82,7 +82,7 @@ public final class HistoryViewModel: ObservableObject {
     
     public func deleteItem(at offsets: IndexSet) async {
         let items = filteredItems
-        let targets = offsets.compactMap { index in
+        let targets: [CompressionHistoryItem] = offsets.compactMap { (index: Int) -> CompressionHistoryItem? in
             guard index >= 0 && index < items.count else { return nil }
             return items[index]
         }

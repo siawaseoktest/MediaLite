@@ -372,7 +372,7 @@ final class VideoProcessorServiceTests: XCTestCase {
                 // Verify output transfer function is NOT HLG or PQ
                 let transfer = extensions[kCVImageBufferTransferFunctionKey] as? String
                 XCTAssertNotEqual(transfer, kCVImageBufferTransferFunction_ITU_R_2100_HLG as String)
-                XCTAssertNotEqual(transfer, kCVImageBufferTransferFunction_SMPTE_ST_2084 as String)
+                XCTAssertNotEqual(transfer, kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String)
 
                 // Verify Rec. 709 primaries
                 if let primaries = extensions[kCVImageBufferColorPrimariesKey] as? String {

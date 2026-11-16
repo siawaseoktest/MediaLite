@@ -220,8 +220,8 @@ public final class PhotoCompressorService: PhotoCompressorProtocol, @unchecked S
         // Synchronize TIFF metadata
         if var tiffDict = outputProperties[kCGImagePropertyTIFFDictionary] as? [CFString: Any] {
             tiffDict[kCGImagePropertyTIFFOrientation] = CGImagePropertyOrientation.up.rawValue
-            tiffDict[kCGImagePropertyTIFFImageWidth] = finalWidth
-            tiffDict[kCGImagePropertyTIFFImageLength] = finalHeight
+            tiffDict[kCGImagePropertyPixelWidth] = finalWidth
+            tiffDict[kCGImagePropertyPixelHeight] = finalHeight
             outputProperties[kCGImagePropertyTIFFDictionary] = tiffDict
         }
 

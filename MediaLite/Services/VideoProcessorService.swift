@@ -217,7 +217,7 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
             // Transfer functions indicating HDR (HLG or PQ / SMPTE ST 2084)
             if let transfer = extensions[kCVImageBufferTransferFunctionKey] as? String {
                 if transfer == (kCVImageBufferTransferFunction_ITU_R_2100_HLG as String) ||
-                   transfer == (kCVImageBufferTransferFunction_SMPTE_ST_2084 as String) ||
+                   transfer == (kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String) ||
                    transfer.contains("2100") ||
                    transfer.contains("2084") ||
                    transfer.contains("HLG") ||
@@ -351,7 +351,7 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
         let outputFileType: AVFileType
         switch destExt {
         case "mov":
-            outputFileType = .quickTimeMovie
+            outputFileType = .mov
         case "m4v":
             outputFileType = .m4v
         default:
