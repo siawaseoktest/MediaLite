@@ -466,8 +466,8 @@ public enum SyntheticAssetGenerator {
             #if canImport(VideoToolbox)
             compressionProps[AVVideoProfileLevelKey] = kVTProfileLevel_HEVC_Main10_AutoLevel
             #endif
-            // Realistic iPhone 10-bit HDR video bitrate (~12-15 Mbps for 1080p)
-            compressionProps[AVVideoAverageBitRateKey] = max(12_000_000, videoWidth * videoHeight * 6)
+            // Realistic iPhone 10-bit HDR video bitrate (~12-16 Mbps for 1080p)
+            compressionProps[AVVideoAverageBitRateKey] = max(14_000_000, videoWidth * videoHeight * 8)
         } else {
             compressionProps[AVVideoProfileLevelKey] = AVVideoProfileLevelH264HighAutoLevel
             compressionProps[AVVideoAverageBitRateKey] = max(1_000_000, videoWidth * videoHeight * 3)
@@ -950,41 +950,56 @@ public enum SyntheticAssetGenerator {
             colorsSpace: colorSpace,
             colors: [
                 CGColor(srgbRed: r, green: g, blue: b, alpha: 1.0),
-                CGColor(srgbRed: 0.9, green: 0.3, blue: 0.5, alpha: 1.0),
-                CGColor(srgbRed: 0.1, green: 0.7, blue: 0.8, alpha: 1.0)
+                CGColor(srgbRed: 0.95, green: 0.65, blue: 0.35, alpha: 1.0),
+                CGColor(srgbRed: 0.2, green: 0.5, blue: 0.85, alpha: 1.0)
             ] as CFArray,
             locations: [0.0, 0.5, 1.0]
         ) {
             context.drawLinearGradient(
                 gradient,
                 start: CGPoint(x: 0, y: 0),
-                end: CGPoint(x: width, y: height),
+                end: CGPoint(x: 0, y: height),
                 options: []
             )
 
-            // Realistic HDR natural geometric horizon, fine texture, and sun rays to generate authentic 10-bit video entropy
-            context.setStrokeColor(CGColor(srgbRed: 1.0, green: 0.95, blue: 0.8, alpha: 0.7))
-            context.setLineWidth(max(2.0, CGFloat(min(width, height)) * 0.015))
-            for i in 0..<8 {
-                let offset = CGFloat(i) * CGFloat(width) / 8.0
-                context.strokeLineSegments(between: [
-                    CGPoint(x: offset, y: 0),
-                    CGPoint(x: CGFloat(width) - offset, y: CGFloat(height))
-                ])
-            }
+            // Realistic HDR natural landscape: mountains and horizon with smooth camera pan motion
+            let horizonY = CGFloat(height) * 0.65
+            context.setFillColor(CGColor(srgbRed: 0.15, green: 0.35, blue: 0.25, alpha: 1.0))
+            let path = CGMutablePath()
+            path.move(to: CGPoint(x: 0, y: CGFloat(height)))
+            path.addLine(to: CGPoint(x: 0, y: horizonY))
+            let peakX = CGFloat(width) * 0.45 + CGFloat(width) * 0.1 * progress
+            let peakY = horizonY - CGFloat(height) * 0.2
+            path.addLine(to: CGPoint(x: peakX, y: peakY))
+            path.addLine(to: CGPoint(x: CGFloat(width), y: horizonY + CGFloat(height) * 0.05))
+            path.addLine(to: CGPoint(x: CGFloat(width), y: CGFloat(height)))
+            path.closeSubpath()
+            context.addPath(path)
+            context.fillPath()
 
-            // Fine texture grid simulating real-world scene high-frequency details (leaves, architecture)
-            let step = max(8, min(width, height) / 24)
-            context.setLineWidth(1.0)
-            for x in stride(from: 0, to: width, by: step) {
-                let alpha = 0.25 + 0.35 * sin(Double(x) * 0.05 + Double(progress) * 4.0)
-                context.setStrokeColor(CGColor(srgbRed: 0.95, green: 0.85, blue: 0.2, alpha: alpha))
-                context.strokeLineSegments(between: [CGPoint(x: x, y: 0), CGPoint(x: x, y: height)])
-            }
-            for y in stride(from: 0, to: height, by: step) {
-                let alpha = 0.25 + 0.35 * cos(Double(y) * 0.05 + Double(progress) * 4.0)
-                context.setStrokeColor(CGColor(srgbRed: 0.2, green: 0.7, blue: 0.9, alpha: alpha))
-                context.strokeLineSegments(between: [CGPoint(x: 0, y: y), CGPoint(x: width, y: y)])
+            // High-dynamic-range sun glow simulating authentic 10-bit HDR highlights
+            let sunCenter = CGPoint(
+                x: CGFloat(width) * 0.75 - CGFloat(width) * 0.15 * progress,
+                y: CGFloat(height) * 0.3
+            )
+            let sunRadius = max(20.0, CGFloat(min(width, height)) * 0.15)
+            if let sunGradient = CGGradient(
+                colorsSpace: colorSpace,
+                colors: [
+                    CGColor(srgbRed: 1.0, green: 0.98, blue: 0.9, alpha: 0.95),
+                    CGColor(srgbRed: 1.0, green: 0.8, blue: 0.3, alpha: 0.5),
+                    CGColor(srgbRed: 1.0, green: 0.5, blue: 0.1, alpha: 0.0)
+                ] as CFArray,
+                locations: [0.0, 0.4, 1.0]
+            ) {
+                context.drawRadialGradient(
+                    sunGradient,
+                    startCenter: sunCenter,
+                    startRadius: 0,
+                    endCenter: sunCenter,
+                    endRadius: sunRadius,
+                    options: []
+                )
             }
         } else {
             context.setFillColor(CGColor(srgbRed: r, green: g, blue: b, alpha: 1.0))

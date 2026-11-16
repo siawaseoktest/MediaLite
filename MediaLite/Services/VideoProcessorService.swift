@@ -405,19 +405,19 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
 
         let bitrateFactor: Double = {
             switch strength {
-            case .low: return 0.90
-            case .medium: return 0.75
-            case .high: return 0.55
+            case .low: return 0.85
+            case .medium: return 0.65
+            case .high: return 0.45
             }
         }()
-        let baseBitrate = Int(Double(targetWidth * targetHeight) * 0.9)
-        var targetBitrate = max(250_000, Int(Double(baseBitrate) * bitrateFactor))
+        let baseBitrate = Int(Double(targetWidth * targetHeight) * 0.65)
+        var targetBitrate = max(200_000, Int(Double(baseBitrate) * bitrateFactor))
 
         // Cap target bitrate based on source bitrate if duration > 0 to guarantee compression savings
         if durationSeconds > 0 {
             let sourceBitrate = Double(originalByteSize * 8) / durationSeconds
             if sourceBitrate > 100_000 {
-                let maxAllowedBitrate = max(250_000, Int(sourceBitrate * bitrateFactor))
+                let maxAllowedBitrate = max(200_000, Int(sourceBitrate * bitrateFactor * 0.75))
                 targetBitrate = min(targetBitrate, maxAllowedBitrate)
             }
         }
@@ -434,11 +434,12 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
             AVVideoTransferFunctionKey: AVVideoTransferFunction_ITU_R_709_2,
             AVVideoYCbCrMatrixKey: AVVideoYCbCrMatrix_ITU_R_709_2,
             AVVideoMaxKeyFrameIntervalKey: 30,
-            AVVideoExpectedSourceFrameRateKey: 30
+            AVVideoExpectedSourceFrameRateKey: 30,
+            AVVideoAllowFrameReorderingKey: true
         ]
 
         if targetCodec == .h264 {
-            compressionProps[AVVideoProfileLevelKey] = AVVideoProfileLevelH264MainAutoLevel
+            compressionProps[AVVideoProfileLevelKey] = AVVideoProfileLevelH264HighAutoLevel
         }
 
         let videoSettings: [String: Any] = [
