@@ -828,7 +828,7 @@ public enum SyntheticAssetGenerator {
             return CMBlockBufferReplaceDataBytes(
                 with: baseAddress,
                 blockBuffer: buffer,
-                writeOffset: 0,
+                offsetIntoDestination: 0,
                 dataLength: bufferSize
             )
         }
@@ -840,7 +840,7 @@ public enum SyntheticAssetGenerator {
             dataBuffer: buffer,
             dataReady: true,
             makeDataReadyCallback: nil,
-            makeDataReadyRefcon: nil,
+            refcon: nil,
             formatDescription: format,
             sampleCount: frames,
             presentationTimeStamp: presentationTimeStamp,
