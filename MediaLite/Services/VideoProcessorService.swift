@@ -398,8 +398,9 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
 
         // 6. Calculate dimensions and bitrate based on Mode and CompressionStrength
         let dimensionScale: CGFloat = (mode == .compressAndConvert) ? strength.dimensionScale : 1.0
-        let targetWidth = max(2, Int(round(naturalSize.width * dimensionScale)) / 2 * 2)
-        let targetHeight = max(2, Int(round(naturalSize.height * dimensionScale)) / 2 * 2)
+        // Align to 16-pixel macroblock boundary for optimal H.264/HEVC compression efficiency
+        let targetWidth = max(16, (Int(round(naturalSize.width * dimensionScale)) / 16) * 16)
+        let targetHeight = max(16, (Int(round(naturalSize.height * dimensionScale)) / 16) * 16)
 
         let bitrateFactor: Double = {
             switch strength {
@@ -408,7 +409,7 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
             case .high: return 0.55
             }
         }()
-        let baseBitrate = Int(Double(targetWidth * targetHeight) * 1.8)
+        let baseBitrate = Int(Double(targetWidth * targetHeight) * 1.5)
         var targetBitrate = max(350_000, Int(Double(baseBitrate) * bitrateFactor))
 
         // Cap target bitrate based on source bitrate if duration > 0 to guarantee compression savings
@@ -430,11 +431,13 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
             AVVideoAverageBitRateKey: targetBitrate,
             AVVideoColorPrimariesKey: AVVideoColorPrimaries_ITU_R_709_2,
             AVVideoTransferFunctionKey: AVVideoTransferFunction_ITU_R_709_2,
-            AVVideoYCbCrMatrixKey: AVVideoYCbCrMatrix_ITU_R_709_2
+            AVVideoYCbCrMatrixKey: AVVideoYCbCrMatrix_ITU_R_709_2,
+            AVVideoMaxKeyFrameIntervalKey: 30,
+            AVVideoExpectedSourceFrameRateKey: 30
         ]
 
         if targetCodec == .h264 {
-            compressionProps[AVVideoProfileLevelKey] = AVVideoProfileLevelH264HighAutoLevel
+            compressionProps[AVVideoProfileLevelKey] = AVVideoProfileLevelH264MainAutoLevel
         }
 
         let videoSettings: [String: Any] = [

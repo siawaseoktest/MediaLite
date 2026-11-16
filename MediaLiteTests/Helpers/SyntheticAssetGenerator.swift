@@ -956,7 +956,7 @@ public enum SyntheticAssetGenerator {
                 options: []
             )
 
-            // Realistic HDR natural geometric horizon and sun rays to generate authentic 10-bit video entropy
+            // Realistic HDR natural geometric horizon, fine texture, and sun rays to generate authentic 10-bit video entropy
             context.setStrokeColor(CGColor(srgbRed: 1.0, green: 0.95, blue: 0.8, alpha: 0.7))
             context.setLineWidth(max(2.0, CGFloat(min(width, height)) * 0.015))
             for i in 0..<8 {
@@ -965,6 +965,20 @@ public enum SyntheticAssetGenerator {
                     CGPoint(x: offset, y: 0),
                     CGPoint(x: CGFloat(width) - offset, y: CGFloat(height))
                 ])
+            }
+
+            // Fine texture grid simulating real-world scene high-frequency details (leaves, architecture)
+            let step = max(8, min(width, height) / 24)
+            context.setLineWidth(1.0)
+            for x in stride(from: 0, to: width, by: step) {
+                let alpha = 0.25 + 0.35 * sin(Double(x) * 0.05 + Double(progress) * 4.0)
+                context.setStrokeColor(CGColor(srgbRed: 0.95, green: 0.85, blue: 0.2, alpha: alpha))
+                context.strokeLineSegments(between: [CGPoint(x: x, y: 0), CGPoint(x: x, y: height)])
+            }
+            for y in stride(from: 0, to: height, by: step) {
+                let alpha = 0.25 + 0.35 * cos(Double(y) * 0.05 + Double(progress) * 4.0)
+                context.setStrokeColor(CGColor(srgbRed: 0.2, green: 0.7, blue: 0.9, alpha: alpha))
+                context.strokeLineSegments(between: [CGPoint(x: 0, y: y), CGPoint(x: width, y: y)])
             }
         } else {
             context.setFillColor(CGColor(srgbRed: r, green: g, blue: b, alpha: 1.0))
