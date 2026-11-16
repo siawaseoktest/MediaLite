@@ -365,10 +365,11 @@ final class CorruptionAndErrorE2ETests: XCTestCase {
 
         let itemsAfterAdd = try await historyStore.loadHistory()
         XCTAssertEqual(itemsAfterAdd.count, 1, "Store should contain exactly 1 item after adding to recovered store")
-        XCTAssertEqual(itemsAfterAdd.first?.id, newItem.id)
-        XCTAssertEqual(itemsAfterAdd.first?.fileName, "recovered_image.jpg")
-        XCTAssertEqual(itemsAfterAdd.first?.byteDelta, 1024)
-        XCTAssertEqual(itemsAfterAdd.first?.reductionPercentage, 50.0, accuracy: 0.001)
+        let firstItem = try XCTUnwrap(itemsAfterAdd.first)
+        XCTAssertEqual(firstItem.id, newItem.id)
+        XCTAssertEqual(firstItem.fileName, "recovered_image.jpg")
+        XCTAssertEqual(firstItem.byteDelta, 1024)
+        XCTAssertEqual(firstItem.reductionPercentage, 50.0, accuracy: 0.001)
 
         // Cleanup the store
         try await historyStore.clearAllHistory()
