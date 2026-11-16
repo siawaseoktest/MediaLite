@@ -770,7 +770,7 @@ public enum SyntheticAssetGenerator {
         }
 
         // End session at .zero so effective movie duration is zero
-        writer.endSession(atSourceEndTime: .zero)
+        writer.endSession(atSourceTime: .zero)
         videoInput.markAsFinished()
 
         await withCheckedContinuation { (c: CheckedContinuation<Void, Never>) in
