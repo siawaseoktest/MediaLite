@@ -466,8 +466,8 @@ public enum SyntheticAssetGenerator {
             #if canImport(VideoToolbox)
             compressionProps[AVVideoProfileLevelKey] = kVTProfileLevel_HEVC_Main10_AutoLevel
             #endif
-            // Realistic iPhone 10-bit HDR video bitrate (~8-10 Mbps for 1080p)
-            compressionProps[AVVideoAverageBitRateKey] = max(8_000_000, videoWidth * videoHeight * 4)
+            // Realistic iPhone 10-bit HDR video bitrate (~12-15 Mbps for 1080p)
+            compressionProps[AVVideoAverageBitRateKey] = max(12_000_000, videoWidth * videoHeight * 6)
         } else {
             compressionProps[AVVideoProfileLevelKey] = AVVideoProfileLevelH264HighAutoLevel
             compressionProps[AVVideoAverageBitRateKey] = max(1_000_000, videoWidth * videoHeight * 3)
@@ -556,9 +556,7 @@ public enum SyntheticAssetGenerator {
                         wroteData = true
                     }
                 } else {
-                    videoInput.markAsFinished()
                     videoFinished = true
-                    wroteData = true
                 }
             }
 
@@ -580,9 +578,7 @@ public enum SyntheticAssetGenerator {
                         wroteData = true
                     }
                 } else {
-                    aInput.markAsFinished()
                     audioFinished = true
-                    wroteData = true
                 }
             }
 
@@ -592,13 +588,16 @@ public enum SyntheticAssetGenerator {
 
             if wroteData {
                 lastProgressDate = Date()
-            } else {
+            } else if !videoFinished || !audioFinished {
                 if Date().timeIntervalSince(lastProgressDate) > 15.0 {
                     throw SyntheticAssetError.writerFailed("Timed out waiting for video/audio input readiness")
                 }
                 try await Task.sleep(nanoseconds: 2_000_000)
             }
         }
+
+        videoInput.markAsFinished()
+        audioInput?.markAsFinished()
 
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             writer.finishWriting {

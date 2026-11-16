@@ -410,7 +410,7 @@ public final class VideoProcessorService: VideoProcessorProtocol, @unchecked Sen
             case .high: return 0.55
             }
         }()
-        let baseBitrate = Int(Double(targetWidth * targetHeight) * 1.2)
+        let baseBitrate = Int(Double(targetWidth * targetHeight) * 0.9)
         var targetBitrate = max(250_000, Int(Double(baseBitrate) * bitrateFactor))
 
         // Cap target bitrate based on source bitrate if duration > 0 to guarantee compression savings
