@@ -37,7 +37,7 @@ public struct CompressView: View {
                 .padding(.top, DesignSystem.Metrics.paddingSmall)
                 .padding(.bottom, DesignSystem.Metrics.paddingLarge)
             }
-            .navigationTitle("Compress")
+            .navigationTitle("Photos")
             .alert("Error", isPresented: $viewModel.showErrorAlert) {
                 Button("OK", role: .cancel) {}
             } message: {

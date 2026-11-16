@@ -368,4 +368,38 @@ final class ConvertViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.optionCompress)
         XCTAssertTrue(viewModel.optionUniversalMP4)
     }
+
+    @MainActor
+    func testConvertViewModelHDRDetectionAndAutoDisableToneMapping() async throws {
+        let viewModel = ConvertViewModel(
+            videoProcessor: mockProcessor,
+            historyStorage: historyStore,
+            photoLibrary: mockLibrary
+        )
+
+        // 1. Initial state (no video selected): isHDRVideo is false
+        XCTAssertFalse(viewModel.isHDRVideo)
+
+        // 2. Load SDR video (fallback metadata from mock has isHDR == false)
+        let file = createTestVideoFile(named: "sdr_video.mov", byteCount: 40_000)
+        try await viewModel.loadVideo(from: file)
+        XCTAssertFalse(viewModel.isHDRVideo)
+        XCTAssertFalse(viewModel.optionToneMapping, "Tone mapping must be automatically deselected (OFF) for SDR video")
+
+        // 3. Simulate HDR video metadata
+        viewModel.videoMetadata = VideoMetadata(
+            duration: 10.0,
+            naturalSize: CGSize(width: 3840, height: 2160),
+            preferredTransform: .identity,
+            isHDR: true,
+            hasAudio: true,
+            codec: "hvc1"
+        )
+        XCTAssertTrue(viewModel.isHDRVideo, "isHDRVideo must be true when HDR video is selected")
+
+        // 4. Reset selection -> resets isHDRVideo and optionToneMapping
+        viewModel.resetSelection()
+        XCTAssertFalse(viewModel.isHDRVideo)
+        XCTAssertFalse(viewModel.optionToneMapping)
+    }
 }

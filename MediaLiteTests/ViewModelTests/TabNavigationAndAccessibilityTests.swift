@@ -284,6 +284,7 @@ final class TabNavigationAndAccessibilityTests: XCTestCase {
         // Verify Key Action and Hero Strings
         XCTAssertTrue(jaContent.contains("\"LIFETIME SAVINGS\" = \"合計削減容量\";"))
         XCTAssertTrue(jaContent.contains("\"Quick Actions\" = \"クイック操作\";"))
+        XCTAssertTrue(jaContent.contains("\"Start Video Compression\" = \"動画圧縮を開始\";"))
         XCTAssertTrue(jaContent.contains("\"BATCH COMPRESSION COMPLETE\" = \"一括圧縮が完了しました\";"))
         XCTAssertTrue(jaContent.contains("\"CONVERSION COMPLETE\" = \"変換完了\";"))
         XCTAssertTrue(jaContent.contains("\"Clear All History\" = \"すべての履歴を消去\";"))

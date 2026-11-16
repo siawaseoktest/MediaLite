@@ -75,6 +75,7 @@
 "Universal MP4" = "Universal MP4";
 "HDR → SDR" = "HDR → SDR";
 "Start Video Conversion" = "動画変換を開始";
+"Start Video Compression" = "動画圧縮を開始";
 "Preparing conversion..." = "変換を準備中...";
 "Cancel Conversion" = "変換をキャンセル";
 "CONVERSION COMPLETE" = "変換完了";

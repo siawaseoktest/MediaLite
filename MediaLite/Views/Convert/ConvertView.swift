@@ -29,19 +29,19 @@ public struct ConvertView: View {
                     } else if viewModel.isConverting {
                         // Conversion In Progress State
                         convertingView
-                    } else if viewModel.selectedVideoURL != nil {
-                        // Video Inspected & Ready for Configuration State
-                        configurationView
                     } else {
-                        // Empty Selection State
-                        videoPickerDropZone
+                        // Configuration & Selection State
+                        configurationView
                     }
                 }
                 .padding(.horizontal, DesignSystem.Metrics.paddingMedium)
                 .padding(.top, DesignSystem.Metrics.paddingSmall)
                 .padding(.bottom, DesignSystem.Metrics.paddingLarge)
             }
-            .navigationTitle("Convert")
+            .safeAreaInset(edge: .bottom) {
+                Color.clear.frame(height: 60)
+            }
+            .navigationTitle("Videos")
             .alert("Error", isPresented: $viewModel.showErrorAlert) {
                 Button("OK", role: .cancel) {}
             } message: {
@@ -49,6 +49,14 @@ public struct ConvertView: View {
             }
             .onAppear {
                 viewModel.syncWithDefaultSettingsIfIdle()
+                if !viewModel.isHDRVideo {
+                    viewModel.optionToneMapping = false
+                }
+            }
+            .onChange(of: viewModel.isHDRVideo) { _, isHDR in
+                if !isHDR {
+                    viewModel.optionToneMapping = false
+                }
             }
         }
     }
@@ -99,31 +107,37 @@ public struct ConvertView: View {
     
     private var configurationView: some View {
         VStack(spacing: 20) {
-            // Video Inspector Card
-            inspectorCard
-            
             // Mode Selector
             modeSelectorSection
             
             // Strength Selector
             strengthSelectorSection
             
-            // Action Button
-            Button {
-                viewModel.startConversion()
-            } label: {
-                HStack {
-                    Image(systemName: "bolt.fill")
-                    Text("Start Video Conversion")
-                        .font(DesignSystem.Fonts.headline)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(DesignSystem.Metrics.paddingMedium)
-                .background(DesignSystem.Colors.accent)
-                .foregroundStyle(.white)
-                .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Metrics.buttonCornerRadius, style: .continuous))
+            // Video Selection Drop Zone or Video Metadata Inspector Card
+            if viewModel.selectedVideoURL == nil {
+                videoPickerDropZone
+            } else {
+                inspectorCard
             }
-            .accessibilityIdentifier("button_start_conversion")
+            
+            // Action Button
+            if viewModel.selectedVideoURL != nil {
+                Button {
+                    viewModel.startConversion()
+                } label: {
+                    HStack {
+                        Image(systemName: "bolt.fill")
+                        Text("Start Video Compression")
+                            .font(DesignSystem.Fonts.headline)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(DesignSystem.Metrics.paddingMedium)
+                    .background(DesignSystem.Colors.accent)
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Metrics.buttonCornerRadius, style: .continuous))
+                }
+                .accessibilityIdentifier("button_start_conversion")
+            }
         }
     }
     
@@ -204,7 +218,12 @@ public struct ConvertView: View {
                 
                 Picker("Video Mode", selection: Binding(
                     get: { viewModel.selectedMode },
-                    set: { viewModel.applyModeSelection($0) }
+                    set: { mode in
+                        viewModel.applyModeSelection(mode)
+                        if !viewModel.isHDRVideo {
+                            viewModel.optionToneMapping = false
+                        }
+                    }
                 )) {
                     ForEach(VideoProcessingMode.allCases, id: \.self) { mode in
                         Text(LocalizedStringKey(mode.title))
@@ -251,10 +270,12 @@ public struct ConvertView: View {
                         viewModel.toggleOptionUniversalMP4()
                     }
                     
+                    let isHDR = viewModel.isHDRVideo
                     optionToggleChip(
                         title: "HDR → SDR",
                         icon: "sun.max.fill",
-                        isSelected: viewModel.optionToneMapping
+                        isSelected: isHDR && viewModel.optionToneMapping,
+                        isDisabled: !isHDR
                     ) {
                         viewModel.toggleOptionToneMapping()
                     }
@@ -269,6 +290,7 @@ public struct ConvertView: View {
         title: String,
         icon: String,
         isSelected: Bool,
+        isDisabled: Bool = false,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
@@ -298,6 +320,8 @@ public struct ConvertView: View {
             }
         }
         .buttonStyle(.plain)
+        .disabled(isDisabled)
+        .opacity(isDisabled ? 0.4 : 1.0)
         .accessibilityIdentifier("toggle_option_\(title.lowercased().replacingOccurrences(of: " ", with: "_"))")
     }
     
@@ -329,6 +353,8 @@ public struct ConvertView: View {
         }
         .padding(DesignSystem.Metrics.cardPadding)
         .liquidGlassCard()
+        .disabled(!viewModel.optionCompress)
+        .opacity(viewModel.optionCompress ? 1.0 : 0.4)
     }
     
     // MARK: - Converting View

@@ -72,6 +72,11 @@ public final class ConvertViewModel: ObservableObject {
     @Published public var optionToneMapping: Bool = true
     public var hasUserCustomizedMode: Bool = false
     
+    /// Returns true if a video is currently selected and contains HDR content.
+    public var isHDRVideo: Bool {
+        selectedVideoURL != nil && (videoMetadata?.isHDR == true)
+    }
+    
     // MARK: - Live Progress
     @Published public var isConverting: Bool = false
     @Published public var conversionProgress: Double = 0.0
@@ -196,6 +201,9 @@ public final class ConvertViewModel: ObservableObject {
         let currentSettings = AppSettings.load()
         applyModeSelection(currentSettings.defaultVideoMode)
         self.selectedStrength = currentSettings.defaultCompressionStrength
+        if !isHDRVideo {
+            self.optionToneMapping = false
+        }
         hasUserCustomizedMode = false
     }
     
@@ -242,6 +250,14 @@ public final class ConvertViewModel: ObservableObject {
                 hasAudio: true,
                 codec: "avc1"
             )
+        }
+        
+        if self.videoMetadata?.isHDR == true {
+            if selectedMode != .reduceSize {
+                self.optionToneMapping = true
+            }
+        } else {
+            self.optionToneMapping = false
         }
     }
     
@@ -374,5 +390,6 @@ public final class ConvertViewModel: ObservableObject {
         progressDescription = ""
         errorMessage = nil
         showErrorAlert = false
+        optionToneMapping = false
     }
 }

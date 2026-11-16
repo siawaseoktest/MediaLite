@@ -75,6 +75,7 @@
 "Universal MP4" = "Universal MP4";
 "HDR → SDR" = "HDR → SDR";
 "Start Video Conversion" = "Start Video Conversion";
+"Start Video Compression" = "Start Video Compression";
 "Preparing conversion..." = "Preparing conversion...";
 "Cancel Conversion" = "Cancel Conversion";
 "CONVERSION COMPLETE" = "CONVERSION COMPLETE";
