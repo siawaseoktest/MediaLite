@@ -962,24 +962,11 @@ public enum SyntheticAssetGenerator {
                 options: []
             )
 
-            // Realistic HDR natural landscape: mountains and horizon with smooth camera pan motion
-            let horizonY = CGFloat(height) * 0.65
-            context.setFillColor(CGColor(srgbRed: 0.15, green: 0.35, blue: 0.25, alpha: 1.0))
-            let path = CGMutablePath()
-            path.move(to: CGPoint(x: 0, y: CGFloat(height)))
-            path.addLine(to: CGPoint(x: 0, y: horizonY))
-            let peakX = CGFloat(width) * 0.45 + CGFloat(width) * 0.1 * progress
-            let peakY = horizonY - CGFloat(height) * 0.2
-            path.addLine(to: CGPoint(x: peakX, y: peakY))
-            path.addLine(to: CGPoint(x: CGFloat(width), y: horizonY + CGFloat(height) * 0.05))
-            path.addLine(to: CGPoint(x: CGFloat(width), y: CGFloat(height)))
-            path.closeSubpath()
-            context.addPath(path)
-            context.fillPath()
+            let panOffset = CGFloat(width) * 0.15 * progress
 
             // High-dynamic-range sun glow simulating authentic 10-bit HDR highlights
             let sunCenter = CGPoint(
-                x: CGFloat(width) * 0.75 - CGFloat(width) * 0.15 * progress,
+                x: CGFloat(width) * 0.75 - panOffset,
                 y: CGFloat(height) * 0.3
             )
             let sunRadius = max(20.0, CGFloat(min(width, height)) * 0.15)
@@ -1000,6 +987,58 @@ public enum SyntheticAssetGenerator {
                     endRadius: sunRadius,
                     options: []
                 )
+            }
+
+            // Realistic HDR natural landscape: distant mountains
+            let horizonY = CGFloat(height) * 0.60
+            context.setFillColor(CGColor(srgbRed: 0.2, green: 0.35, blue: 0.45, alpha: 1.0))
+            let mountainPath = CGMutablePath()
+            mountainPath.move(to: CGPoint(x: 0, y: CGFloat(height)))
+            mountainPath.addLine(to: CGPoint(x: 0, y: horizonY))
+            mountainPath.addLine(to: CGPoint(x: CGFloat(width) * 0.3 - panOffset * 0.5, y: horizonY - CGFloat(height) * 0.25))
+            mountainPath.addLine(to: CGPoint(x: CGFloat(width) * 0.7 - panOffset * 0.5, y: horizonY - CGFloat(height) * 0.15))
+            mountainPath.addLine(to: CGPoint(x: CGFloat(width), y: horizonY - CGFloat(height) * 0.05))
+            mountainPath.addLine(to: CGPoint(x: CGFloat(width), y: CGFloat(height)))
+            mountainPath.closeSubpath()
+            context.addPath(mountainPath)
+            context.fillPath()
+
+            // Foreground hills and landscape terrain
+            let fgHorizonY = CGFloat(height) * 0.72
+            context.setFillColor(CGColor(srgbRed: 0.12, green: 0.28, blue: 0.18, alpha: 1.0))
+            let fgPath = CGMutablePath()
+            fgPath.move(to: CGPoint(x: 0, y: CGFloat(height)))
+            fgPath.addLine(to: CGPoint(x: 0, y: fgHorizonY))
+            fgPath.addLine(to: CGPoint(x: CGFloat(width) * 0.5 - panOffset, y: fgHorizonY - CGFloat(height) * 0.12))
+            fgPath.addLine(to: CGPoint(x: CGFloat(width), y: fgHorizonY + CGFloat(height) * 0.02))
+            fgPath.addLine(to: CGPoint(x: CGFloat(width), y: CGFloat(height)))
+            fgPath.closeSubpath()
+            context.addPath(fgPath)
+            context.fillPath()
+
+            // Authentic natural landscape spatial details (trees, terrain ridges, field textures)
+            // Statically anchored to panOffset so motion vectors are purely translational (no flicker)
+            context.setLineWidth(2.0)
+            let detailSpacing: CGFloat = 16.0
+            let startX = -panOffset.truncatingRemainder(dividingBy: detailSpacing)
+            for x in stride(from: startX, to: CGFloat(width) + detailSpacing, by: detailSpacing) {
+                let worldX = x + panOffset
+                let ridgeHeight = 15.0 + 10.0 * sin(Double(worldX) * 0.03)
+                context.setStrokeColor(CGColor(srgbRed: 0.08, green: 0.22, blue: 0.12, alpha: 0.8))
+                context.strokeLineSegments(between: [
+                    CGPoint(x: x, y: CGFloat(height)),
+                    CGPoint(x: x, y: CGFloat(height) - CGFloat(ridgeHeight) * CGFloat(height) / 300.0)
+                ])
+            }
+
+            // Cloud layers in sky with authentic soft gradients, translating smoothly
+            for c in 0..<3 {
+                let cloudX = CGFloat(width) * (0.2 + CGFloat(c) * 0.35) - panOffset * 0.3
+                let cloudY = CGFloat(height) * (0.15 + CGFloat(c) * 0.08)
+                let cloudW = CGFloat(width) * 0.22
+                let cloudH = CGFloat(height) * 0.06
+                context.setFillColor(CGColor(srgbRed: 1.0, green: 0.95, blue: 0.9, alpha: 0.45))
+                context.fillEllipse(in: CGRect(x: cloudX - cloudW / 2, y: cloudY - cloudH / 2, width: cloudW, height: cloudH))
             }
         } else {
             context.setFillColor(CGColor(srgbRed: r, green: g, blue: b, alpha: 1.0))
